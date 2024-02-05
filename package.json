@@ -1,0 +1,23 @@
+{
+  "name": "findinglovebackend",
+  "version": "1.0.0",
+  "description": "MATCH MAKING AND FINDING LOVE APP",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "love",
+    "match",
+    "making",
+    "relationship"
+  ],
+  "author": "EFFIONG GODSWILL",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "mongodb": "^6.3.0",
+    "mongoose": "^8.1.1"
+  }
+}
