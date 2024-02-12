@@ -22,8 +22,7 @@ systemNumber: {
   },
 
   dateOfBirth: {
-    type: Date,
-   // required: true,
+    type: Date, // required: true,
   },
 
   gender: {
@@ -81,8 +80,8 @@ systemNumber: {
 
   pinUpdatedAt: {
     type: Date,
-  },
-   // Timestamp for transaction PIN changes
+  }, // Timestamp for transaction PIN changes
+
   displayPhoto: {
     type: String,
   },
@@ -115,7 +114,8 @@ idcard: {
 
   accountStatus: {
     type: String,
-    default: 'active',
+    enum: ['online', 'offline', 'blocked', 'suspended',  ],
+    default: 'online',
   },
 
    occupation: {
