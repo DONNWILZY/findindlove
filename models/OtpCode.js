@@ -1,4 +1,4 @@
-//models\OtpCode.js
+
 /////// Model for Otp code 6 digit send on registration
 const mongoose = require('mongoose');
 

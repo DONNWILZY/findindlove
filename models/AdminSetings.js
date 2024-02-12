@@ -19,13 +19,17 @@ const adminSettingsSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
-    userAccountStatus: {
-       
+    minDepositAmount: {
+       type: Number,
     },
+
+    numberOfFreeVote: {
+        type: Number,
+     },
    
 });
 
-// Create a Mongoose model using the schema
+
 const AdminSettings = mongoose.model('AdminSettings', adminSettingsSchema);
 
 module.exports = AdminSettings;

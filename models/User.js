@@ -56,6 +56,10 @@ systemNumber: {
     required: true,
   }, 
 
+  wallet: {
+    type: Number,
+  }, 
+
 
   passwordHistory: {
     type: [String],
@@ -117,9 +121,19 @@ idcard: {
     enum: ['online', 'offline', 'blocked', 'suspended',  ],
     default: 'online',
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'superAdmin', 'Moderator',  ],
+    default: 'user',
+  },
 
    occupation: {
     type: String,
+  },
+
+  twofactorAuth:{
+    type: Boolean,
+    default: false,
   },
 
   nextOfKin: {
