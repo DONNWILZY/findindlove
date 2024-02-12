@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Reaction = require('./Reaction'); // Assuming you have Reaction schema defined in './Reaction.js'
 
 const NewsSchema = new mongoose.Schema({
     users: [{
@@ -38,22 +39,7 @@ const NewsSchema = new mongoose.Schema({
         required: true
     },
     reactions: {
-        like: {
-            type: Number,
-            default: 0
-        },
-        love: {
-            type: Number,
-            default: 0
-        },
-        clap: {
-            type: Number,
-            default: 0
-        },
-        dislike: {
-            type: Number,
-            default: 0
-        }
+        type: [Reaction.schema] // Reference to Reaction schema
     },
     comments: [{
         user: {
@@ -65,22 +51,7 @@ const NewsSchema = new mongoose.Schema({
             required: true
         },
         reactions: {
-            like: {
-                type: Number,
-                default: 0
-            },
-            love: {
-                type: Number,
-                default: 0
-            },
-            clap: {
-                type: Number,
-                default: 0
-            },
-            dislike: {
-                type: Number,
-                default: 0
-            }
+            type: [Reaction.schema] // Reference to Reaction schema
         },
         replies: [{
             user: {
@@ -92,22 +63,7 @@ const NewsSchema = new mongoose.Schema({
                 required: true
             },
             reactions: {
-                like: {
-                    type: Number,
-                    default: 0
-                },
-                love: {
-                    type: Number,
-                    default: 0
-                },
-                clap: {
-                    type: Number,
-                    default: 0
-                },
-                dislike: {
-                    type: Number,
-                    default: 0
-                }
+                type: [Reaction.schema] // Reference to Reaction schema
             },
             createdAt: {
                 type: Date,
@@ -131,26 +87,9 @@ const NewsSchema = new mongoose.Schema({
         repliesCount: {
             type: Number,
             default: 0
-        },
-        commentReactionsCount: {
-            type: Number,
-            default: 0
-        },
-        replyReactionsCount: {
-            type: Number,
-            default: 0
         }
-    },
-    meta: {
-        views: {
-            type: Number,
-            default: 0
-        },
     }
-});
-
-// Add timestamps
-NewsSchema.set('timestamps', true);
+}, { timestamps: true });
 
 const News = mongoose.model('News', NewsSchema);
 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Reaction = require('./Reaction'); // Assuming you have Reaction schema defined in './Reaction.js'
 
 const PostSchema = new mongoose.Schema({
     user: {
@@ -14,11 +15,7 @@ const PostSchema = new mongoose.Schema({
         type: [String]
     },
     reactions: {
-        likes: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }],
-        // You can add more reaction types as needed
+        type: [Reaction.schema] // Reference to Reaction schema
     },
     comments: [{
         user: {
@@ -32,17 +29,9 @@ const PostSchema = new mongoose.Schema({
         createdAt: {
             type: Date,
             default: Date.now
-        },
-        likes: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }]
-    }],
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
-});
+        }
+    }]
+}, { timestamps: true });
 
 const Post = mongoose.model('Post', PostSchema);
 
