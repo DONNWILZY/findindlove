@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Reaction = require('./Reaction'); // Assuming you have Reaction schema defined in './Reaction.js'
+const Comment = require('./Comment');
 
 const VideoContentSchema = new mongoose.Schema({
     users: [{
@@ -43,35 +44,9 @@ const VideoContentSchema = new mongoose.Schema({
     reactions: {
         type: [Reaction.schema] // Reference to Reaction schema
     },
-    comments: [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        content: {
-            type: String,
-            required: true
-        },
-        reactions: {
-            type: [Reaction.schema] // Reference to Reaction schema
-        },
-        replies: [{
-            user: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User'
-            },
-            content: {
-                type: String,
-                required: true
-            },
-            reactions: {
-                type: [Reaction.schema] // Reference to Reaction schema
-            },
-           
-        }, 
-        { timestamps: true }],
-       
-    }],
+    comments: {
+        type: [Comment.schema] // Reference to Reaction schema
+    },
     analytics: {
         reactionsCount: {
             type: Number,

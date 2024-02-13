@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Reaction = require('./Reaction'); 
+const Comment = require('./Comment'); 
+
 
 const PostSchema = new mongoose.Schema({
     user: {
@@ -17,20 +19,17 @@ const PostSchema = new mongoose.Schema({
     reactions: {
         type: [Reaction.schema] // Reference to Reaction schema
     },
-    comments: [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        content: {
-            type: String,
-            required: true
-        },
-        createdAt: {
-            type: Date,
-            default: Date.now
-        }
-    }]
+    comments: {
+        type: [Comment.schema] // Reference to Reaction schema
+    },
+    allowComment:{
+        type: Bolean,
+    },
+
+    allowReaction:{
+        type: Bolean,
+    },
+    
 }, { timestamps: true });
 
 const Post = mongoose.model('Post', PostSchema);
