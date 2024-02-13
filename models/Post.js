@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Reaction = require('./Reaction'); // Assuming you have Reaction schema defined in './Reaction.js'
+const Reaction = require('./Reaction'); 
 
 const PostSchema = new mongoose.Schema({
     user: {

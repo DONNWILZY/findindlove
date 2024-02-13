@@ -23,9 +23,7 @@ const adminSettingsSchema = new mongoose.Schema({
        type: Number,
     },
 
-    numberOfFreeVote: {
-        type: Number,
-     },
+  
    
 });
 
