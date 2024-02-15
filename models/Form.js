@@ -12,6 +12,7 @@ const formSchema = new mongoose.Schema({
         ref: 'User', 
         required: true
     },
+    
     status: {
         type: String,
         enum: ['pending', 'reviewing', 'exempted', 'disqualified', 'approved'],
