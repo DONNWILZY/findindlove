@@ -23,6 +23,8 @@ const notificationSchema = new mongoose.Schema({
         enum: ['user', 'admin', "admin"],
         required: true,
     },
+
+    
     
 });
 
