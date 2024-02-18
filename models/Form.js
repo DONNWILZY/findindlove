@@ -12,6 +12,12 @@ const formSchema = new mongoose.Schema({
         ref: 'User', 
         required: true
     },
+
+    season: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Season',
+        required: true
+    },
     
     status: {
         type: String,

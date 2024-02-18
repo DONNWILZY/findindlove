@@ -9,9 +9,14 @@ const VoteSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    season: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Season',
+        required: true
+    },
     houseMates: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Housemate',
         required: true
     }],
     startTime: {
@@ -22,15 +27,21 @@ const VoteSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    maxVotesPerUser: {
-        type: Number,
-        //default: 1 
-    },
     votes: [{
-        voters: {
+        voter: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true
+        },
+        housemate: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Housemate',
+            required: true
+        },
+        numVotes: {
+            type: Number,
+            required: true,
+            min: 1  // Ensure at least one vote is cast
         },
         optionIndex: {
             type: Number,

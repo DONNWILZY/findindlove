@@ -15,21 +15,25 @@ const VideoContentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-
-    allowComment:{
-        type: Bolean,
+    season: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Season',
+        required: true
     },
-
-    allowReaction:{
-        type: Bolean,
+    allowComment: {
+        type: Boolean, 
+        default: true // Default allowComment to true
     },
-   
+    allowReaction: {
+        type: Boolean, 
+        default: true // Default allowReaction to true
+    },
     videoLink: {
         type: String,
         required: true
     },
     keywords: {
-        type: [String], 
+        type: [String],
         required: true
     },
     tags: {
@@ -40,12 +44,11 @@ const VideoContentSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
- 
     reactions: {
         type: [Reaction.schema] // Reference to Reaction schema
     },
     comments: {
-        type: [Comment.schema] // Reference to Reaction schema
+        type: [Comment.schema] // Reference to Comment schema
     },
     analytics: {
         reactionsCount: {

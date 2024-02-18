@@ -15,6 +15,11 @@ const dataSettingsSchema = new mongoose.Schema({
     votePointConversionRate: {
         type: Number,
         default: 5 // Default rate: 1 vote point = 5 Naira
+    },
+
+    userActivityLog:{
+        type: Bolean,
+        default: false
     }
 
 });

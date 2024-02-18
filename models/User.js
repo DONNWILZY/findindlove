@@ -59,6 +59,10 @@ systemNumber: {
     required: true,
   }, 
 
+  activityLog:{
+    type: Bolean
+  },
+
   wallet: {
     balance: {
       type: Number,

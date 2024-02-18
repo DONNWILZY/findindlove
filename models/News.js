@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 const Reaction = require('./Reaction'); 
 const Comment = require('./Comment'); 
-   
 
 const NewsSchema = new mongoose.Schema({
-    users: [{
+    houseMate: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
@@ -28,6 +27,11 @@ const NewsSchema = new mongoose.Schema({
         type: [String],
         required: true
     },
+    season: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Season',
+        required: true
+    },
     tags: {
         type: [String]
     },
@@ -41,19 +45,21 @@ const NewsSchema = new mongoose.Schema({
         required: true
     },
     reactions: {
-        type: [Reaction.schema] // Reference to Reaction schema
+        type: [Reaction.schema], // Reference to Reaction schema
+        default: []
     },
     comments: {
-        type: [Comment.schema] // Reference to comment schema
+        type: [Comment.schema], // Reference to comment schema
+        default: []
     },
-    allowComment:{
-        type: Bolean,
+    allowComment: {
+        type: Boolean,
+        default: true // Default allowComment to true
     },
-
-    allowReaction:{
-        type: Bolean,
+    allowReaction: {
+        type: Boolean,
+        default: true // Default allowReaction to true
     },
-
     analytics: {
         reactionsCount: {
             type: Number,
