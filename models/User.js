@@ -44,20 +44,39 @@ systemNumber: {
     default: null 
 },
 
-  email: {
+  email:{
     type: String,
     required: true,
     unique: true,
   },
+
+  isHouseMate:{
+    type: Bolean
+  },
   
- 
-  password: {
+   password:{
     type: String,
     required: true,
   }, 
 
   wallet: {
-    type: Number,
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    currency: {
+      type: String,
+      enums: ['USD', 'NGD'],
+      default: 'NGN',
+    },
+    votePoints: {
+      type: Number,
+      default: 0,
+    },
+    referralPoints: {
+      type: Number,
+      default: 0,
+    },
   }, 
 
 
@@ -121,6 +140,8 @@ idcard: {
     enum: ['online', 'offline', 'blocked', 'suspended',  ],
     default: 'online',
   },
+
+
   role: {
     type: String,
     enum: ['user', 'admin', 'superAdmin', 'Moderator',  ],
@@ -130,6 +151,7 @@ idcard: {
    occupation: {
     type: String,
   },
+
 
   twofactorAuth:{
     type: Boolean,
@@ -152,6 +174,18 @@ idcard: {
       type: String,
     },
   },
+
+  updateNotification: {
+    email:{
+      type: Bolean
+    },
+    inapp:{
+      type: Bolean
+    },
+    sms:{
+
+    }
+  }, 
 
   location: {
     address: {

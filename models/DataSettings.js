@@ -3,23 +3,18 @@ const mongoose = require('mongoose');
 const dataSettingsSchema = new mongoose.Schema({
 
     freeVote:{
-        type: Number
+        type: Number,
+        default: 5 
     },
 
     minDeposit:{
-        type: Number
+        type: Number,
+        default: 500 // 500 NGR
     },
 
-    numberOfHouseMate:{
-        type: Number
-    },
-
-    amountPerVote:{
-        type: Number
-    },
-
-    duration:{
-        type: Number
+    votePointConversionRate: {
+        type: Number,
+        default: 5 // Default rate: 1 vote point = 5 Naira
     }
 
 });
