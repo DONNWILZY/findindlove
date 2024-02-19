@@ -1,4 +1,3 @@
-// models/Form.js
 const mongoose = require('mongoose');
 
 const formSchema = new mongoose.Schema({
@@ -12,19 +11,16 @@ const formSchema = new mongoose.Schema({
         ref: 'User', 
         required: true
     },
-
     season: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Season',
         required: true
     },
-    
     status: {
         type: String,
         enum: ['pending', 'reviewing', 'exempted', 'disqualified', 'approved'],
         default: 'pending'
     },
-
     title: {
         type: String,
         required: true
@@ -36,11 +32,9 @@ const formSchema = new mongoose.Schema({
     formPhoto: {
         type: String
     },
-
     adminComment: {
         type: String,
     },
-
     responses: [{
         answers: [{
             questionId: {
@@ -48,7 +42,10 @@ const formSchema = new mongoose.Schema({
                 ref: 'Form.questions'
             },
             response: String
-        }]
+        }],
+        // label:{
+        //     type: String
+        // }
     }],
     questions: [{
         type: {
@@ -69,6 +66,20 @@ const formSchema = new mongoose.Schema({
 }, 
 {
     timestamps: true 
+});
+
+// Pre-save hook to link answers to questions
+formSchema.pre('save', function(next) {
+    const form = this;
+    form.responses.forEach(responseGroup => {
+        responseGroup.answers.forEach(answer => {
+            const question = form.questions.find(question => question._id.equals(answer.questionId));
+            if (question) {
+                answer.questionLabel = question.label;
+            }
+        });
+    });
+    next();
 });
 
 const Form = mongoose.model('Form', formSchema);
