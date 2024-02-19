@@ -7,6 +7,24 @@ const SeasonSchema = new mongoose.Schema({
     description: {
         type: String
     },
+    
+    subtitle: {
+        type: String
+    },
+
+    year:{
+        type: Date
+    },
+
+    duration:{
+        starts:{
+            type: Date
+        },
+
+        ends:{
+            type: Date
+        }
+    },
 
     news: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -39,13 +57,7 @@ const SeasonSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-       
     }]
-
-
-
-
-
 
 });
 

@@ -6,6 +6,8 @@ const notificationSchema = new mongoose.Schema({
         ref: "User", 
         required: true,
     },
+
+    
     message: {
         type: String,
         required: true,
@@ -20,15 +22,83 @@ const notificationSchema = new mongoose.Schema({
     },
     recipientType: {
         type: String,
-        enum: ['user', 'admin', "admin"],
+        enum: ['user', 'admin'],
         required: true,
     },
+    // Additional fields for suggested features
+    frequency: {
+        type: String,
+        enum: ['immediate', 'daily digest', 'weekly summary'],
+    },
+    customSound: {
+        type: String,
+    },
 
-    
-    
+    userActions: {
+        likes: {
+            type: Boolean,
+            default: true,
+        },
+        comments: {
+            type: Boolean,
+            default: true,
+        },
+        mentions: {
+            type: Boolean,
+            default: true,
+        },
+    },
+    contextual: {
+        locationBased: {
+            type: Boolean,
+            default: true,
+        },
+        timeBased: {
+            type: Boolean,
+            default: true,
+        },
+        deviceBased: {
+            type: Boolean,
+            default: true,
+        },
+    },
 });
 
-// Create a Mongoose model using the schema
+
 const Notification = mongoose.model('Notification', notificationSchema);
 
 module.exports = Notification;
+
+
+// const notificationSchema = new mongoose.Schema({
+//     user: {
+//         type: mongoose.Schema.Types.ObjectId,
+//         ref: "User", 
+//         required: true,
+//     },
+//     message: {
+//         type: String,
+//         required: true,
+//     },
+//     timestamp: {
+//         type: Date,
+//         default: Date.now,
+//     },
+//     isRead: {
+//         type: Boolean,
+//         default: false,
+//     },
+//     recipientType: {
+//         type: String,
+//         enum: ['user', 'admin', "admin"],
+//         required: true,
+//     },
+
+    
+    
+// });
+
+// // Create a Mongoose model using the schema
+// const Notification = mongoose.model('Notification', notificationSchema);
+
+// module.exports = Notification;

@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
 
-systemNumber: {
+  systemNumber: {
     type: Number,
-    unique: true, 
+    unique: true,
   },
-  
+
   firstName: {
     type: String,
     required: true,
@@ -22,15 +22,15 @@ systemNumber: {
   },
 
   dateOfBirth: {
-    type: Date, // required: true,
+    type: Date,
   },
 
   gender: {
     type: String,
     enum: ['male', 'female', 'not set'],
     default: 'not set',
-    //required: true
-},
+
+  },
 
   nationality: {
     type: String,
@@ -41,25 +41,25 @@ systemNumber: {
     type: Number,
     unique: true,
     sparse: true,
-    default: null 
-},
+    default: null
+  },
 
-  email:{
+  email: {
     type: String,
     required: true,
     unique: true,
   },
 
-  isHouseMate:{
+  isHouseMate: {
     type: Bolean
   },
-  
-   password:{
+
+  password: {
     type: String,
     required: true,
-  }, 
+  },
 
-  activityLog:{
+  activityLog: {
     type: Bolean
   },
 
@@ -81,7 +81,7 @@ systemNumber: {
       type: Number,
       default: 0,
     },
-  }, 
+  },
 
 
   passwordHistory: {
@@ -94,8 +94,8 @@ systemNumber: {
 
   passwordUpdatedAt: {
     type: Date,
-  }, 
- 
+  },
+
   transactionPIN: {
     type: String,
     required: true,
@@ -117,13 +117,13 @@ systemNumber: {
     type: [String],
     validate: [arrayLimit, '{PATH} exceeds the limit of 5'],
     default: []
-},
+  },
 
-idcard: {
+  idcard: {
     type: String,
   },
 
-  
+
   isPhoneVerified: {
     type: Boolean,
     default: false,
@@ -141,23 +141,23 @@ idcard: {
 
   accountStatus: {
     type: String,
-    enum: ['online', 'offline', 'blocked', 'suspended',  ],
+    enum: ['online', 'offline', 'blocked', 'suspended',],
     default: 'online',
   },
 
 
   role: {
     type: String,
-    enum: ['user', 'admin', 'superAdmin', 'Moderator',  ],
+    enum: ['user', 'admin', 'superAdmin', 'Moderator',],
     default: 'user',
   },
 
-   occupation: {
+  occupation: {
     type: String,
   },
 
 
-  twofactorAuth:{
+  twofactorAuth: {
     type: Boolean,
     default: false,
   },
@@ -180,16 +180,96 @@ idcard: {
   },
 
   updateNotification: {
-    email:{
-      type: Bolean
+    email: {
+      type: Bolean,
+      default: true
     },
-    inapp:{
-      type: Bolean
+    inapp: {
+      type: Bolean,
+      default: true
     },
-    sms:{
-
+    sms: {
+      type: Bolean,
+      default: true
     }
-  }, 
+  },
+
+  season: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Season',
+  },
+
+  matched: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
+
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  blockedFollowers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+
+  posts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+  }],
+  news: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'News'
+  }],
+  votes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vote'
+  }],
+
+  forms:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Form'
+  }],
+
+  userSettings:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'UserSettings'
+  }],
+
+  videoContent:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'VideoContent'
+  }],
+
+  comments:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Comment'
+  }],
+  CommentReplies:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CommentReply'
+  }],
+  devicePermission:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'DevicePermission'
+  }],
+  interests:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Interest'
+  }],
+  notification:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Notification'
+  }],
+
+   reactions:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Reaction'
+  }],
 
   location: {
     address: {
@@ -208,8 +288,8 @@ idcard: {
     },
   },
 },
-{
-  timestamps: true, // Automatically add createdAt and updatedAt timestamps
-});
+  {
+    timestamps: true,
+  });
 
 module.exports = mongoose.model('User', userSchema);
