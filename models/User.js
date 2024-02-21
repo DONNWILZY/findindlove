@@ -143,10 +143,23 @@ const userSchema = new mongoose.Schema({
   },
 
   accountStatus: {
-    type: String,
+    action:{
+      type: String,
     enum: ['online', 'offline', 'blocked', 'suspended',],
     default: 'online',
+    },
+    reason:{
+      type: String,
+    },
+    duration:{
+      type: String,
+    },
+    durationType:{
+      type: String,
+      enum: ['hours', 'days', 'months', 'year']
+    }
   },
+
 
 
   role: {

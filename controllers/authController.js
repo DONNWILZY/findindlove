@@ -10,8 +10,8 @@ const registerUser = async (req, res) => {
     const { firstName, lastName, username, phoneNumber, email, password } = req.body;
 
     try {
-        // Check if a user with the provided email or phone number already exists
-        let user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
+        // Check if a user with the provided email or phone  number or username already exists
+        let user = await User.findOne({ $or: [{ email }, { phoneNumber }, { username }] });
 
         if (user) {
             // If user is already verified, inform the user
