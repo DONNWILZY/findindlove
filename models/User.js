@@ -21,6 +21,11 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 
+  username: {
+    type: String,
+    required: true,
+  },
+
   dateOfBirth: {
     type: Date,
   },
@@ -34,7 +39,7 @@ const userSchema = new mongoose.Schema({
 
   nationality: {
     type: String,
-    required: true,
+    // required: true,
   },
 
   phone: {
@@ -51,7 +56,7 @@ const userSchema = new mongoose.Schema({
   },
 
   isHouseMate: {
-    type: Bolean
+    type: Boolean
   },
 
   password: {
@@ -60,7 +65,7 @@ const userSchema = new mongoose.Schema({
   },
 
   activityLog: {
-    type: Bolean
+    type: Boolean
   },
 
   wallet: {
@@ -98,7 +103,7 @@ const userSchema = new mongoose.Schema({
 
   transactionPIN: {
     type: String,
-    required: true,
+    // required: true,
   }, // Hashed separately
 
   oldPins: {
@@ -115,9 +120,7 @@ const userSchema = new mongoose.Schema({
 
   images: {
     type: [String],
-    validate: [arrayLimit, '{PATH} exceeds the limit of 5'],
-    default: []
-  },
+    },
 
   idcard: {
     type: String,
@@ -165,11 +168,11 @@ const userSchema = new mongoose.Schema({
   nextOfKin: {
     fullName: {
       type: String,
-      required: true,
+      // required: true,
     },
     phoneNumber: {
       type: String,
-      required: true,
+      // required: true,
     },
     email: {
       type: String,
@@ -179,20 +182,20 @@ const userSchema = new mongoose.Schema({
     },
   },
 
-  updateNotification: {
-    email: {
-      type: Bolean,
-      default: true
-    },
-    inapp: {
-      type: Bolean,
-      default: true
-    },
-    sms: {
-      type: Bolean,
-      default: true
-    }
-  },
+  // updateNotification: {
+  //   email: {
+  //     type: Boolean,
+  //     default: true
+  //   },
+  //   inapp: {
+  //     type: Boolean,
+  //     default: true
+  //   },
+  //   sms: {
+  //     type: Boolean,
+  //     default: true
+  //   }
+  // },
 
   season: {
     type: mongoose.Schema.Types.ObjectId,
@@ -274,11 +277,11 @@ const userSchema = new mongoose.Schema({
   location: {
     address: {
       type: String,
-      required: true,
+      // required: true,
     },
     city: {
       type: String,
-      required: true,
+      // required: true,
     },
     state: {
       type: String,
