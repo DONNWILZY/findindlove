@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Reaction = require('./Reaction'); 
+const Reaction = require('./Reactions'); 
 const Comment = require('./Comment'); 
 
 
@@ -23,11 +23,11 @@ const PostSchema = new mongoose.Schema({
         type: [Comment.schema] // Reference to Reaction schema
     },
     allowComment:{
-        type: Bolean,
+        type: Boolean,
     },
 
     allowReaction:{
-        type: Bolean,
+        type: Boolean,
     },
     
 }, { timestamps: true });

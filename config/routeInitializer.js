@@ -13,7 +13,7 @@ function initializeRoutes(app) {
   app.use('/api/auth', authRoute);
   
   // Use seasonRote
-  app.use('/api/auth', seasonRoute);
+  app.use('/api/season', seasonRoute);
   
   
 }

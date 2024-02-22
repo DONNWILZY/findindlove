@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Reaction = require('./Reaction'); // Reaction schema
+const Reaction = require('./Reactions'); // Reaction schema
 const CommentReply = require( './CommentReply' ) // CommentReply schema
 
 const CommentSchema = new mongoose.Schema({

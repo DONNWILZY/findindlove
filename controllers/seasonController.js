@@ -1,24 +1,19 @@
 const User = require('../models/User');
-const Vote = require('../models/User');
-const Form = require('../models/User');
-const News = require('../models/User');
-const VideoContent = require('../models/User');
+const Vote = require('../models/Votes');
+const Form = require('../models/Form');
+const News = require('../models/News');
+const VideoContent = require('../models/VideoContent');
 const HouseMate = require('../models/User');
-const Post = require('../models/User');
+const Post = require('../models/Post');
+const Season = require('../models/Season');
+const Notification = require('../models/Notification');
+
+
 
 const createSeason = async (req, res) => {
     const { title, description, subtitle, year, duration, createdBy } = req.body;
 
     try {
-        // Fetch the user by their ID
-        const creator = await User.findById(createdBy);
-        if (!creator) {
-            return res.status(404).json({
-                status: 'failed',
-                message: 'Creator not found'
-            });
-        }
-
         // Create the season with the provided data
         const newSeason = new Season({
             title,
@@ -26,16 +21,39 @@ const createSeason = async (req, res) => {
             subtitle,
             year,
             duration,
-            createdBy: creator // Assign the creator to the season
+            createdBy // Attach the creator to the season
         });
 
         // Save the season to the database
         const savedSeason = await newSeason.save();
 
+        // Find all users with the superAdmin role
+        const superAdmins = await User.find({ role: 'superAdmin' });
+
+        // Collect IDs of superAdmin users
+        const recipientIds = superAdmins.map(admin => admin._id);
+
+        // Create notifications for superAdmin users
+        const notifications = recipientIds.map(recipientId => new Notification({
+            user: recipientId,
+            message: `New season "${title}" has been created.`,
+            recipientType: 'superAdmin'
+            // You may add additional fields or customizations here
+        }));
+
+        // Save notifications to the database
+        await Notification.insertMany(notifications);
+
         return res.status(201).json({
             status: 'success',
             message: 'Season created successfully',
-            season: savedSeason
+            season: {
+                title,
+                description,
+                subtitle,
+                year,
+                duration
+            }
         });
     } catch (error) {
         console.error('Error while creating season:', error);
@@ -59,7 +77,14 @@ const createSeason = async (req, res) => {
 
 
 
+
+
+
+
+
+
 const season = {
+    createSeason,
 
 }
 

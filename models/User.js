@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
     type: Number,
     unique: true,
     sparse: true,
-    default: null
+    // default: null//
   },
 
   email: {

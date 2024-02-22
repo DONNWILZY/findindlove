@@ -9,11 +9,17 @@ const notificationSchema = new mongoose.Schema({
         required: true,
     },
 
-    
+    recipients: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User", 
+        required: true,
+    }],
+
     message: {
         type: String,
         required: true,
     },
+
     timestamp: {
         type: Date,
         default: Date.now,
@@ -24,7 +30,7 @@ const notificationSchema = new mongoose.Schema({
     },
     recipientType: {
         type: String,
-        enum: ['user', 'admin'],
+        enum: ['user', 'admin', 'superAdmin', 'Moderator',],
         required: true,
     },
     // Additional fields for suggested features

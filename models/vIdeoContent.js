@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Reaction = require('./Reaction'); // Assuming you have Reaction schema defined in './Reaction.js'
+const Reaction = require('./Reactions');  // Assuming you have Reaction schema defined in './Reaction.js'
 const Comment = require('./Comment');
 
 const VideoContentSchema = new mongoose.Schema({
