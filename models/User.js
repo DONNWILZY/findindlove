@@ -120,7 +120,7 @@ const userSchema = new mongoose.Schema({
 
   images: {
     type: [String],
-    },
+  },
 
   idcard: {
     type: String,
@@ -143,28 +143,30 @@ const userSchema = new mongoose.Schema({
   },
 
   accountStatus: {
-    action:{
+    action: {
       type: String,
-    enum: ['online', 'offline', 'blocked', 'suspended',],
-    default: 'online',
+      enum: ['online', 'offline', 'blocked', 'suspended',],
+      default: 'online',
     },
-   
-    duration:{
+
+    duration: {
       type: String,
     },
-    durationType:{
+    durationType: {
       type: String,
       enum: ['hours', 'days', 'months', 'year']
     }
   },
 
 
-
   role: {
     type: String,
-    enum: ['user', 'admin', 'superAdmin', 'Moderator',],
+    enum: ['user', 'admin', 'superAdmin', 'Moderator'],
     default: 'user',
   },
+  permissions: [{
+    type: String,
+  }],
 
   occupation: {
     type: String,
@@ -244,43 +246,43 @@ const userSchema = new mongoose.Schema({
     ref: 'Vote'
   }],
 
-  forms:[{
+  forms: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Form'
   }],
 
-  userSettings:[{
+  userSettings: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'UserSettings'
   }],
 
-  videoContent:[{
+  videoContent: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'VideoContent'
   }],
 
-  comments:[{
+  comments: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment'
   }],
-  CommentReplies:[{
+  CommentReplies: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CommentReply'
   }],
-  devicePermission:[{
+  devicePermission: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'DevicePermission'
   }],
-  interests:[{
+  interests: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Interest'
   }],
-  notification:[{
+  notification: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Notification'
   }],
 
-   reactions:[{
+  reactions: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Reaction'
   }],
