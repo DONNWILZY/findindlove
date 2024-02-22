@@ -1,3 +1,5 @@
+//models\Notification.js
+
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
@@ -34,6 +36,7 @@ const notificationSchema = new mongoose.Schema({
         type: String,
     },
 
+
     userActions: {
         likes: {
             type: Boolean,
@@ -48,6 +51,12 @@ const notificationSchema = new mongoose.Schema({
             default: true,
         },
     },
+
+    NotifyLogin:{
+    type: Boolean,
+    default: false,
+    },
+
     contextual: {
         locationBased: {
             type: Boolean,

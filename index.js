@@ -3,6 +3,7 @@ const app = express();
 const nodemailer = require('nodemailer');
 
 const mongoose  = require('mongoose');
+
 const connectToDatabase = require('./config/db');
 connectToDatabase(); // database function
 
@@ -11,27 +12,23 @@ dotenv.config();
 
 app.use(express.json());
 
-const authRoute = require('./routes/authRoute');
+// Import route initializer
+const initializeRoutes = require('./config/routeInitializer');
 
-app.use('/api/auth', authRoute);
+// Initialize routes
+initializeRoutes(app);
 
 
-const PORT = process.env.PORT || 5000
-////// URL FOR THE PROJECT
-const prodUrl = `http://127.0.0.1:${PORT}` ;
-const liveUrl =  `${process.env.currentUrl}:${PORT}`
-const currentUrl = liveUrl ||  prodUrl  
+// Import port configuration
+const { port, currentUrl } = require('./config/urlAndPort');
 
 
 app.get('/', (req, res) =>{
-  res.send( `DEFAULT ROUTE IS WORKING`)
+  res.send( `DEFAULT ROUTE IS WORKING`);
   
 });
 
 
-
-
-app.listen(PORT, ()=>{
-    console.log(`Connected on PORT ${PORT} || ${currentUrl}`)
-    
-  })
+app.listen(port, () => {
+  console.log(`Connected on PORT ${port} || ${currentUrl}`);
+});

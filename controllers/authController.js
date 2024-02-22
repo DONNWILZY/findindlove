@@ -5,7 +5,10 @@ const jwt = require('jsonwebtoken');
 const User = require("../models/User");
 const OtpCode = require("../models/OtpCode");
 const transporter = require("../Utilities/transporter");
+const Notification = require("../models/Notification");
 
+
+//////////////// SIGNUP HERE HERE /////////////////////////
 const registerUser = async (req, res) => {
     const { firstName, lastName, username, phoneNumber, email, password } = req.body;
 
@@ -120,4 +123,145 @@ const sendVerificationEmail = async (email, otpCode) => {
     }
 };
 
-module.exports = { registerUser };
+
+
+
+//////////////// LOGIN HERE /////////////////////////
+const login = async (req, res) => {
+  const { username, email, phoneNumber, password } = req.body;
+
+  try {
+      // Find user by username, email, or phone number
+      const user = await User.findOne({
+          $or: [{ username }, { email }, { phoneNumber }]
+      });
+
+      if (!user) {
+          return res.status(404).json({
+              status: "failed",
+              message: "User not found."
+          });
+      }
+
+      // Check if the user's email is verified
+      if (!user.isEmailVerified) {
+          return res.status(400).json({
+              status: "failed",
+              message: "Email is not verified. Please verify your email address."
+          });
+      }
+
+      // Check if the user's account is blocked
+      if (user.accountStatus.action === "blocked") {
+          // Check if it's time to retry login
+          const duration = parseInt(user.accountStatus.duration);
+          const durationType = user.accountStatus.durationType;
+
+          if (duration > 0) {
+              return res.status(403).json({
+                  status: "failed",
+                  message: `Your account is blocked. You can try again in ${duration} ${durationType}.`
+              });
+          }
+      }
+
+      // Compare passwords
+      const isPasswordMatch = await bcrypt.compare(password, user.password);
+      if (!isPasswordMatch) {
+          // Update account status on failed login attempts
+          // This part is not implemented here, but you can implement it to update the account status accordingly
+
+          return res.status(401).json({
+              status: "failed",
+              message: "Invalid credentials."
+          });
+      }
+
+      // Generate auth token
+      const authToken = jwt.sign({ userId: user._id }, process.env.JWT_SEC_KEY);
+
+      // Check if NotifyLogin is true and send notification
+      if (user.NotifyLogin) {
+          const message = "You have logged in to your account.";
+          sendNotification(user._id, message);
+      }
+
+      // Update account status to online
+       user.accountStatus.action = "online";
+      await user.save();
+
+      // Return user data
+      return res.status(200).json({
+          status: "success",
+          user: {
+              username: user.username,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              AppId: user.systemNumber,
+              authToken,
+              accountStatus: user.accountStatus.action
+          }
+      });
+  } catch (error) {
+      console.error("Error while logging in:", error);
+      return res.status(500).json({
+          status: "failed",
+          message: "An error occurred while logging in. Please try again."
+      });
+  }
+};
+
+const sendNotification = async (userId, message) => {
+  try {
+      // Retrieve user's email
+      const user = await User.findById(userId);
+      const email = user.email;
+
+      // Send notification via email
+      const mailOptions = {
+          from: process.env.AUTH_EMAIL,
+          to: email,
+          subject: "New Login Notification",
+          text: message
+      };
+      await transporter.sendMail(mailOptions);
+
+      // Send notification via in-app notification (if applicable)
+      // This part is not implemented here, but you can implement it according to your application's logic
+  } catch (error) {
+      console.error("Error sending notification:", error);
+      throw new Error("Failed to send notification.");
+  }
+};
+
+
+const logout = async (req, res) => {
+  const userId = req.user.id;
+  try {
+      // Find the user by ID
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Clear authentication token (if any)
+      user.authToken = null;
+
+      // Change user status to offline
+      user.accountStatus.action = 'offline';
+
+      // Save the updated user
+      await user.save();
+
+      return res.status(200).json({ message: 'Logout successful' });
+  } catch (error) {
+      console.error('Error while logging out:', error);
+      return res.status(500).json({ message: 'An error occurred while logging out' });
+  }
+};
+
+
+
+
+
+module.exports = { registerUser, login, logout };

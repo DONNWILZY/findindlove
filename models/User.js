@@ -148,9 +148,7 @@ const userSchema = new mongoose.Schema({
     enum: ['online', 'offline', 'blocked', 'suspended',],
     default: 'online',
     },
-    reason:{
-      type: String,
-    },
+   
     duration:{
       type: String,
     },

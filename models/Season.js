@@ -2,30 +2,28 @@ const mongoose = require('mongoose');
 
 const SeasonSchema = new mongoose.Schema({
     title: {
-        type: String
+        type: String,
+        required: true
     },
     description: {
-        type: String
+        type: String,
+        required: true
     },
-    
-    subtitle: {
-        type: String
+    subtitle: String,
+    year: {
+        type: Date,
+        required: true
     },
-
-    year:{
-        type: Date
-    },
-
-    duration:{
-        starts:{
-            type: Date
+    duration: {
+        starts: {
+            type: Date,
+            required: true
         },
-
-        ends:{
-            type: Date
+        ends: {
+            type: Date,
+            required: true
         }
     },
-
     news: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'News'
@@ -42,14 +40,12 @@ const SeasonSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Vote'
     }],
-
     houseMate: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
-
     matches: [{
-        malehouseMate: {
+        maleHouseMate: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
@@ -57,9 +53,19 @@ const SeasonSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-    }]
-
+    }],
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
 });
+
+// Indexes
+SeasonSchema.index({ title: 'text' }); // Example index on the title field
 
 const Season = mongoose.model('Season', SeasonSchema);
 
