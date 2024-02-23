@@ -199,7 +199,9 @@ const login = async (req, res) => {
               lastName: user.lastName,
               AppId: user.systemNumber,
               authToken,
-              accountStatus: user.accountStatus.action
+              accountStatus: user.accountStatus.action,
+              role: user.role
+
           }
       });
   } catch (error) {
