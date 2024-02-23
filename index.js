@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const nodemailer = require('nodemailer');
-const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin} = require('./middlewares/authMiddleware');
+const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin, checkPermission} = require('./middlewares/authMiddleware');
 
 const mongoose  = require('mongoose');
 
@@ -23,7 +23,7 @@ initializeRoutes(app);
 const { port, currentUrl } = require('./config/urlAndPort');
 
 // deault route for testing
-app.get('/', verifyToken, verifyStaff, (req, res) =>{
+app.get('/', verifyToken,   checkPermission('create_season'), (req, res) =>{
   res.send( `DEFAULT ROUTE IS WORKING`);
   
 });

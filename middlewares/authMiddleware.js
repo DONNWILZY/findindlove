@@ -43,6 +43,7 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
+
 // Middleware to verify super admin role
 const verifySuperAdmin = async (req, res, next) => {
   try {
@@ -59,12 +60,12 @@ const verifySuperAdmin = async (req, res, next) => {
   }
 };
 
-// Middleware to verify admin or user role
+// Middleware to verify admin role
 const verifyAdmin = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.userId);
 
-    if (user && (user.role === 'admin')) {
+    if (user && user.role === 'admin') {
       next();
     } else {
       return next(new AppError('You are not an ADMIN', 401));
@@ -80,7 +81,7 @@ const verifyUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.userId);
 
-    if (user.role === 'user') {
+    if (user && user.role === 'user') {
       next();
     } else {
       return next(new AppError('You are not a verified USER', 401));
@@ -96,7 +97,7 @@ const verifyStaff = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.userId);
 
-    if (user.role === 'staff') {
+    if (user && user.role === 'staff') {
       next();
     } else {
       return next(new AppError('You are not a verified STAFF', 401));
@@ -107,6 +108,37 @@ const verifyStaff = async (req, res, next) => {
   }
 };
 
+// Middleware to verify user role and permissions
+const checkPermission = (requiredPermission) => {
+  return async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user.userId); // Find user by ID
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const userRole = user.role; // Accessing role from user model
+      const userPermissions = user.permissions || [];
+
+      if (userRole === 'superAdmin') {
+        // If user is superAdmin, authorize them
+        next(); 
+      } else if (user.role === 'admin' || user.role === 'moderator' && userPermissions.includes(requiredPermission)) {
+        // If user has the required permission, authorize them
+        next(); 
+      } else {
+        // User doesn't have the required permission, deny access
+        res.status(403).json({ message: "You don't have permission to access this resource." });
+      }
+    } catch (error) {
+      console.error("Error while checking permissions:", error);
+      res.status(500).json({ message: "Internal server error." });
+    }
+  };
+};
+
+
+
 
 module.exports = {
   AppError,
@@ -115,4 +147,5 @@ module.exports = {
   verifySuperAdmin,
   verifyAdmin,
   verifyStaff,
+  checkPermission
 };
