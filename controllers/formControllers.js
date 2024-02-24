@@ -203,6 +203,57 @@ const updateQuestion = async (formId, questionId, newQuestionData) => {
 
 
 // Function to update multiple questions
+const updateQuestions = async (req, res) => {
+    try {
+        const { formId, questions } = req.body;
+
+        // Check if formId and questions array are provided
+        if (!formId || !Array.isArray(questions) || questions.length === 0) {
+            return res.status(400).json({ message: "Invalid request. Provide formId and questions array." });
+        }
+
+        // Retrieve the form from the database
+        const form = await Form.findById(formId);
+        if (!form) {
+            return res.status(404).json({ message: "Form not found." });
+        }
+
+        // Update each question
+        for (const updatedQuestion of questions) {
+            const existingQuestion = form.questions.find(q => q._id.equals(updatedQuestion.questionId));
+            if (!existingQuestion) {
+                return res.status(404).json({ message: `Question with ID ${updatedQuestion.questionId} not found in the form.` });
+            }
+
+            // Update the existing question with the provided data
+            existingQuestion.label = updatedQuestion.label;
+            existingQuestion.type = updatedQuestion.type;
+            existingQuestion.required = updatedQuestion.required;
+        }
+
+        // Save the updated form
+        await form.save();
+
+        // Format and return response data
+        const responseData = {
+            message: "Questions updated successfully.",
+            form: {
+                _id: form._id,
+                title: form.title,
+                description: form.description,
+                formPhoto: form.formPhoto,
+                duration: form.duration,
+                editForm: form.editForm
+            },
+            questions: form.questions
+        };
+
+        res.status(200).json(responseData);
+    } catch (error) {
+        console.error('Error updating questions:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 
 
@@ -218,5 +269,4 @@ const updateQuestion = async (formId, questionId, newQuestionData) => {
 
 
 
-
-module.exports = { createForm, fillForm, updateQuestion,  };
+module.exports = { createForm, fillForm, updateQuestion, updateQuestions };

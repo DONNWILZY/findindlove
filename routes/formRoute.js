@@ -36,23 +36,7 @@ router.put('/editquestion/:formId/:questionId', async (req, res) => {
 });
 
 // Route to update multiple questions
-router.put('/updateQuestions', async (req, res) => {
-    try {
-        const { formId, questions } = req.body;
-
-        // Call the controller function to update questions
-        const updateResult = await updateQuestions(formId, questions);
-        
-        if (updateResult.success) {
-            res.status(200).json({ message: 'Questions updated successfully.' });
-        } else {
-            res.status(400).json({ message: updateResult.message });
-        }
-    } catch (error) {
-        console.error('Error updating questions:', error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
+router.put('/updateQuestions', updateQuestions);
 
 
 
