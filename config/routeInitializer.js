@@ -7,6 +7,8 @@ const authRoute = require('../routes/authRoute');
 const seasonRoute = require('../routes/seasonRoute');
 // import permssion route
 const permissionRoute = require('../routes/PermissionRoute');
+//import form routes
+const formRoute = require('../routes/formRoute');
 
 function initializeRoutes(app) {
 
@@ -16,6 +18,9 @@ function initializeRoutes(app) {
   app.use('/api/season', seasonRoute);
    // Use permissionRoute
    app.use('/api/permission', permissionRoute);
+   //use form route
+   app.use('/api/form', formRoute);
+
   
   
 }

@@ -168,6 +168,10 @@ const userSchema = new mongoose.Schema({
     type: String,
   }],
 
+  position: {
+    type: String
+  },
+
   occupation: {
     type: String,
   },

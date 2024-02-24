@@ -3,11 +3,12 @@
 const express = require('express');
 const router = express.Router();
 const { createPermission, addPermissionsToUser  } = require('../controllers/permissionController');
+const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin, checkPermission} = require('../middlewares/authMiddleware');
 
 // create permissions
-router.post('/create', createPermission);
+router.post('/create', verifyToken, checkPermission('create_permission'), createPermission);
 // route to add permissions to a user
-router.post('/assign/:userId/', async (req, res) => {
+router.post('/assign/:userId/', verifyToken, checkPermission('assign_permission'),  async (req, res) => {
     const { userId } = req.params;
     const { permissionIds } = req.body;
   
