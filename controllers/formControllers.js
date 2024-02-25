@@ -520,6 +520,25 @@ const updateFormResponses = async (req, res) => {
 };
 
 
+const deleteForm = async (req, res) => {
+    try {
+        const formId = req.params.formId;
+
+        // Find the form by its ID and delete it
+        const deletedForm = await Form.findByIdAndDelete(formId);
+
+        // Check if the form exists and was successfully deleted
+        if (!deletedForm) {
+            return res.status(404).json({ message: "Form not found." });
+        }
+
+        // Respond with a success message
+        res.status(200).json({ message: "Form deleted successfully." });
+    } catch (error) {
+        console.error('Error deleting form:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 
 
@@ -533,4 +552,6 @@ const updateFormResponses = async (req, res) => {
 
 
 
-module.exports = { createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails, updateFormResponses };
+
+
+module.exports = { createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails, updateFormResponses, deleteForm };
