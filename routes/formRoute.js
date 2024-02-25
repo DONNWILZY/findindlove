@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Form = require('../models/Form');
-const {createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails} = require('../controllers/formControllers'); // Import the createForm function
+const {createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails, updateFormResponses} = require('../controllers/formControllers'); // Import the createForm function
 const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin, checkPermission} = require('../middlewares/authMiddleware');
 
 
@@ -41,6 +41,9 @@ router.put('/updateQuestions', verifyToken, checkPermission('update_form'), upda
 
 // update form details 
 router.put('/updateform', verifyToken, checkPermission('update_form'), updateFormDetails);
+
+// update response 
+router.put('/updateResponse', updateFormResponses);
 
 
 
