@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Form = require('../models/Form');
-const {createForm, fillForm, updateQuestion, updateQuestions} = require('../controllers/formControllers'); // Import the createForm function
+const {createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails} = require('../controllers/formControllers'); // Import the createForm function
 const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin, checkPermission} = require('../middlewares/authMiddleware');
 
 
@@ -11,11 +11,12 @@ const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin, chec
 
 // Route handler to create a form
 router.post('/new', verifyToken, checkPermission('create_form1'), createForm);
-// route 
-router.post('/fill', fillForm);
 
-// Route to update a question
-router.put('/editquestion/:formId/:questionId', async (req, res) => {
+// route to fill a form
+router.post('/fill', verifyToken, fillForm);
+
+// Route to update a single question
+router.put('/editquestion/:formId/:questionId', verifyToken, checkPermission('update_form'), async (req, res) => {
     try {
         const { formId, questionId } = req.params;
         const newQuestionData = req.body; 
@@ -36,7 +37,10 @@ router.put('/editquestion/:formId/:questionId', async (req, res) => {
 });
 
 // Route to update multiple questions
-router.put('/updateQuestions', updateQuestions);
+router.put('/updateQuestions', verifyToken, checkPermission('update_form'), updateQuestions);
+
+// update form details 
+router.put('/updateform', verifyToken, checkPermission('update_form'), updateFormDetails);
 
 
 

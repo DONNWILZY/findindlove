@@ -17,12 +17,13 @@ const formSchema = new mongoose.Schema({
             default: 'pending'
         },
 
-        feedback: {
-            type: String
-        },
-
-
+       
     }],
+
+    closeForm:{
+        type: Boolean,
+    },
+
     season: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Season',
@@ -73,19 +74,23 @@ const formSchema = new mongoose.Schema({
             },
             response: {
                 value: {
-                    type: String // Or change it to match the appropriate type of response
+                    type: String 
                 },
                 type: {
                     type: String,
-                    enum: ['text', 'textarea', 'radio', 'checkbox', 'dropdown']
+                    enum: ['text', 'textarea', 'radio', 'checkbox', 'dropdown', 'date', 'file']
                 }
-            }
+            },        
+            
         }],
         status: {
             type: String,
             enum: ['pending', 'completed'],
             default: 'pending'
-        }
+        },
+        sendMeACopy:{
+            type: Boolean,
+        },
     }],
     
     questions: [{
@@ -111,21 +116,37 @@ const formSchema = new mongoose.Schema({
         timestamps: true
     });
 
-// check for edit
-formSchema.pre('findOneAndUpdate', async function (next) {
-    // Check if the update operation includes modifications to form responses
-    if (this._update.responses) {
-        const formId = this._conditions._id;
-        const form = await this.model.findOne({ _id: formId });
+// Pre-save hook to link answers to questions and limit response edits
+formSchema.pre('save', async function(next) {
+    // Get the form instance
+    const form = this;
 
-        // Increment the edit count
-        form.editForm.numOfTimes -= 1;
+    // Check if there are modifications to responses
+    if (form.isModified('responses')) {
+        // Check if the responses are being updated for the first time
+        if (!form.responses || form.responses.length === 0) {
+            // This is the initial filling, so set the initial edit count
+            form.initialEditCount = form.editForm.numOfTimes;
+        } else {
+            // Check if the edit count has reached zero
+            if (form.editForm.numOfTimes === 0) {
+                throw new Error('You have reached the maximum number of edits for this form.');
+            } else {
+                // Decrement the edit count
+                form.editForm.numOfTimes -= 1;
 
-        // Update the document with the new edit count
-        await this.model.updateOne({ _id: formId }, { editForm: form.editForm });
+                // Notify user about the remaining edit count
+                const remainingEdits = form.editForm.numOfTimes;
+                // You can implement your notification mechanism here
+                console.log(`You have ${remainingEdits} edit(s) remaining for this form.`);
+            }
+        }
     }
+
+    // Continue with the save operation
     next();
 });
+
 
 
 // Pre-save hook to link answers to questions
