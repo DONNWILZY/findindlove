@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Form = require('../models/Form');
+const Season = require('../models/Season');
 
 const createForm = async (req, res) => {
     try {
@@ -542,6 +543,50 @@ const deleteForm = async (req, res) => {
 
 
 
+const addFormToSeason = async (req, res) => {
+    try {
+        const { seasonId, formId } = req.body;
+
+        // Ensure both seasonId and formId are provided
+        if (!seasonId || !formId) {
+            return res.status(400).json({ message: "Both seasonId and formId are required in the request body." });
+        }
+
+        // Check if the season exists
+        const season = await Season.findById(seasonId);
+        if (!season) {
+            return res.status(404).json({ message: "Season not found." });
+        }
+
+        // Check if the form exists
+        const form = await Form.findById(formId);
+        if (!form) {
+            return res.status(404).json({ message: "Form not found." });
+        }
+
+        // Check if the form is already added to the season
+        if (season.forms.includes(formId)) {
+            return res.status(400).json({ message: "Form is already added to the season." });
+        }
+
+        // Add the form to the season and the season to the form
+        season.forms.push(formId);
+        form.season = seasonId;
+
+        // Save changes
+        await season.save();
+        await form.save();
+
+        return res.status(200).json({ message: "Form added to season successfully." });
+    } catch (error) {
+        console.error('Error adding form to season:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+module.exports = {
+    addFormToSeason
+};
 
 
 
@@ -554,4 +599,13 @@ const deleteForm = async (req, res) => {
 
 
 
-module.exports = { createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails, updateFormResponses, deleteForm };
+
+
+
+
+
+
+
+
+
+module.exports = { createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails, updateFormResponses, deleteForm, addFormToSeason };
