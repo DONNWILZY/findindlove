@@ -1,8 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const Form = require('../models/Form');
-const {createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails, updateFormResponses, deleteForm, addFormToSeason} = require('../controllers/formControllers'); // Import the createForm function
-const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin, checkPermission} = require('../middlewares/authMiddleware');
+const {
+    createForm, 
+    fillForm, 
+    updateQuestion, 
+    updateQuestions, 
+    updateFormDetails, 
+    updateFormResponses, 
+    deleteForm, 
+    addFormToSeason, 
+    getFormDetails, 
+    getAllFormDetails,
+    getFormWithResponses,
+    getFormQuestionsAndResponsesForUser
+} = require('../controllers/formControllers'); // Import the createForm function
+
+const {verifyToken, 
+    verifyUser, 
+    verifyAdmin, 
+    verifyStaff, 
+    verifySuperAdmin, checkPermission} = require('../middlewares/authMiddleware');
 
 
 
@@ -46,10 +64,24 @@ router.put('/updateform', verifyToken, checkPermission('update_form'), updateFor
 router.put('/updateResponse', verifyToken, updateFormResponses);
 
 // DELETE route to delete a form by its ID
-router.delete('/delete/:formId',  verifyToken, checkPermission('delete_form'), deleteForm);
+router.delete('/delete/:formId',  verifyToken, checkPermission('update_form'), deleteForm);
 
 // add form to seasn and season to form
-router.post('/addseason', addFormToSeason);
+router.post('/addseason', verifyToken, checkPermission('update_form'), addFormToSeason);
+
+// get form with ID only form details and questiosn
+router.get('/view/:formId',  getFormDetails);
+
+// get all form with with questions 
+router.get('/forms', getAllFormDetails);
+
+// get a single form and responses 
+router.get('/responses/:formId', getFormWithResponses);
+
+router.get('/response/:formId', getFormQuestionsAndResponsesForUser);
+
+
+
 
 
 

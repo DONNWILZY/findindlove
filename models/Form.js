@@ -24,6 +24,14 @@ const formSchema = new mongoose.Schema({
         type: Boolean,
     },
 
+    notifyCreator:{
+        type: Boolean
+    },
+
+    notifySuperAdmin:{
+        type: Boolean
+    },
+
     season: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Season',
@@ -40,9 +48,7 @@ const formSchema = new mongoose.Schema({
     formPhoto: {
         type: String
     },
-    adminComment: {
-        type: String,
-    },
+   
     duration: {
         starts: {
             type: Date,
@@ -90,6 +96,9 @@ const formSchema = new mongoose.Schema({
         },
         sendMeACopy:{
             type: Boolean,
+        },
+        adminComment: {
+            type: String,
         },
     }],
     

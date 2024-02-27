@@ -584,8 +584,172 @@ const addFormToSeason = async (req, res) => {
     }
 };
 
-module.exports = {
-    addFormToSeason
+
+
+const getFormDetails = async (req, res) => {
+    try {
+        const { formId } = req.params;
+
+        // Check if formId is provided
+        if (!formId) {
+            return res.status(400).json({ message: "Form ID is required." });
+        }
+
+        // Retrieve the form from the database
+        const form = await Form.findById(formId).populate('questions');
+
+        // Check if the form exists
+        if (!form) {
+            return res.status(404).json({ message: "Form not found." });
+        }
+
+        // Extract form details
+        const { _id, title, description, formPhoto, duration, editForm, questions } = form;
+
+        // Extract question details
+        const formattedQuestions = questions.map(question => {
+            const { _id, type, label, options, required } = question;
+            return { _id, type, label, options, required };
+        });
+
+        // Prepare response
+        const responseData = {
+            form: {
+                _id,
+                title,
+                description,
+                formPhoto,
+                duration,
+                editForm
+            },
+            questions: formattedQuestions
+        };
+
+        // Return response
+        res.status(200).json(responseData);
+    } catch (error) {
+        console.error('Error getting form details:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
+const getAllFormDetails = async (req, res) => {
+    try {
+        // Fetch all forms from the database
+        const forms = await Form.find();
+
+        // Map over each form to extract form details and questions
+        const formsWithDetails = forms.map(form => {
+            // Extract form details
+            const { _id, title, season, description, duration, editForm, formPhoto, questions } = form;
+
+            // Extract details for each question
+            const formattedQuestions = questions.map(question => ({
+                type: question.type,
+                label: question.label,
+                options: question.options
+            }));
+
+            // Return form details along with formatted questions
+            return {
+                _id,
+                title,
+                season,
+                description,
+                duration,
+                editForm,
+                formPhoto,
+
+                
+                questions: formattedQuestions
+            };
+        });
+
+        // Send the response with all form details and questions
+        res.status(200).json({ forms: formsWithDetails });
+    } catch (error) {
+        console.error('Error fetching form details:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+const getFormWithResponses = async (req, res) => {
+    try {
+        const { formId } = req.params;
+
+        // Find the form with the provided ID
+        const form = await Form.findById(formId);
+        if (!form) {
+            return res.status(404).json({ message: "Form not found." });
+        }
+
+        // Populate the response values
+        const populatedResponses = await Promise.all(form.responses.map(async response => {
+            const populatedAnswers = await Promise.all(response.answers.map(async answer => {
+                // Populate the value of the answer
+                const populatedAnswer = await answer.populate('value').execPopulate();
+                return {
+                    answerId: answer._id,
+                    responseValue: populatedAnswer.value,
+                    questionLabel: answer.questionLabel,
+                    questionType: answer.responseType
+                };
+            }));
+
+            return populatedAnswers;
+        }));
+
+        // Construct the response data
+        const responseData = populatedResponses.flat();
+
+        res.status(200).json(responseData);
+    } catch (error) {
+        console.error('Error fetching form details:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+const getFormQuestionsAndResponsesForUser = async (req, res) => {
+    try {
+        const { formId, userId } = req.params;
+
+        // Find the form with the provided formId
+        const form = await Form.findById(formId).exec();
+
+        // Check if the form exists
+        if (!form) {
+            return res.status(404).json({ message: 'Form not found.' });
+        }
+
+        // Extract the question details from the form
+        const questions = form.questions.map(question => {
+            return {
+                questionId: question._id,
+                label: question.label,
+                type: question.type,
+                options: question.options
+            };
+        });
+
+        // Find all responses for the specified user within the form
+        const userResponses = form.responses.filter(response => response.user.toString() === userId);
+
+        // Prepare the response data with questions and user responses
+        const responseData = {
+            questions: questions,
+            userResponses: userResponses
+        };
+
+        // Respond with the data
+        res.status(200).json(responseData);
+    } catch (error) {
+        console.error('Error fetching form questions and responses:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 };
 
 
@@ -608,4 +772,28 @@ module.exports = {
 
 
 
-module.exports = { createForm, fillForm, updateQuestion, updateQuestions, updateFormDetails, updateFormResponses, deleteForm, addFormToSeason };
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { 
+    createForm, 
+    fillForm, 
+    updateQuestion, 
+    updateQuestions, 
+    updateFormDetails, 
+    updateFormResponses, 
+    deleteForm, 
+    addFormToSeason, 
+    getFormDetails,
+    getAllFormDetails,
+    getFormWithResponses,
+    getFormQuestionsAndResponsesForUser
+};
