@@ -20,7 +20,8 @@ const {verifyToken,
     verifyUser, 
     verifyAdmin, 
     verifyStaff, 
-    verifySuperAdmin, checkPermission} = require('../middlewares/authMiddleware');
+    verifySuperAdmin, checkPermission
+} = require('../middlewares/authMiddleware');
 
 
 
