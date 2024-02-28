@@ -1,5 +1,3 @@
-//models\Notification.js
-
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
@@ -8,18 +6,15 @@ const notificationSchema = new mongoose.Schema({
         ref: "User", 
         required: true,
     },
-
     recipients: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User", 
         required: true,
     }],
-
     message: {
         type: String,
         required: true,
     },
-
     timestamp: {
         type: Date,
         default: Date.now,
@@ -30,10 +25,17 @@ const notificationSchema = new mongoose.Schema({
     },
     recipientType: {
         type: String,
-        enum: ['user', 'admin', 'superAdmin', 'Moderator',],
+        enum: ['user', 'admin', 'superAdmin', 'Moderator'],
         required: true,
     },
-    // Additional fields for suggested features
+    activityType: {
+        type: String,
+        required: true,
+    },
+    activityId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+    },
     frequency: {
         type: String,
         enum: ['immediate', 'daily digest', 'weekly summary'],
@@ -41,8 +43,6 @@ const notificationSchema = new mongoose.Schema({
     customSound: {
         type: String,
     },
-
-
     userActions: {
         likes: {
             type: Boolean,
@@ -57,12 +57,10 @@ const notificationSchema = new mongoose.Schema({
             default: true,
         },
     },
-
     NotifyLogin:{
-    type: Boolean,
-    default: false,
+        type: Boolean,
+        default: false,
     },
-
     contextual: {
         locationBased: {
             type: Boolean,
@@ -79,41 +77,6 @@ const notificationSchema = new mongoose.Schema({
     },
 });
 
-
 const Notification = mongoose.model('Notification', notificationSchema);
 
 module.exports = Notification;
-
-
-// const notificationSchema = new mongoose.Schema({
-//     user: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: "User", 
-//         required: true,
-//     },
-//     message: {
-//         type: String,
-//         required: true,
-//     },
-//     timestamp: {
-//         type: Date,
-//         default: Date.now,
-//     },
-//     isRead: {
-//         type: Boolean,
-//         default: false,
-//     },
-//     recipientType: {
-//         type: String,
-//         enum: ['user', 'admin', "admin"],
-//         required: true,
-//     },
-
-    
-    
-// });
-
-// // Create a Mongoose model using the schema
-// const Notification = mongoose.model('Notification', notificationSchema);
-
-// module.exports = Notification;

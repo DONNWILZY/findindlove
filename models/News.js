@@ -5,7 +5,7 @@ const Comment = require('./Comment');
 const NewsSchema = new mongoose.Schema({
     user: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User' 
     }],
     title: {
         type: String,

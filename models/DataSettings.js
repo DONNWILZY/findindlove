@@ -18,7 +18,7 @@ const dataSettingsSchema = new mongoose.Schema({
     },
 
     userActivityLog:{
-        type: Bolean,
+        type: Boolean,
         default: false
     }
 

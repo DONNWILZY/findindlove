@@ -1,8 +1,13 @@
-const mongoose = require('mongoose');
-const News = require('../models/News');
-const Season = require('../models/Season');
-const User = require('../models/User');
-const houseMates = require('../models/User');
+// const mongoose = require('mongoose');
+// const News = require('../models/News');
+// const Season = require('../models/Season');
+// const User = require('../models/User');
+// const houseMates = require('../models/User');
+const Models = require('../models');
+const News = Models.news;
+const User = Models.user;
+const Season = Models.season;
+
 
 
 const createNewsPost = async (userId, title, content, images, featuredImage, keywords, season, autoSchedule, scheduledDate, allowComment, allowReaction, Promo, featured, latest, exclusive, notifyAdmin, notifyUser, manualAuthorName, users) => {
@@ -96,7 +101,44 @@ const extractMentions = (content) => {
 
 
 
+
+const updateNewsPost = async (postId, updatedFields, userMentions) => {
+    try {
+        // Fetch the news post by ID
+        let newsPost = await News.findById(postId);
+        if (!newsPost) {
+            throw new Error('News post not found.');
+        }
+
+        // Update the fields
+        Object.assign(newsPost, updatedFields);
+
+        // Replace mentions in the content
+        if (userMentions && userMentions.length > 0) {
+            let modifiedContent = newsPost.content;
+            userMentions.forEach((mention) => {
+                const mentionRegex = new RegExp(`@${mention.username}`, 'g');
+                modifiedContent = modifiedContent.replace(mentionRegex, `@${mention.username}`);
+            });
+            newsPost.content = modifiedContent;
+        }
+
+        // Save the updated news post
+        await newsPost.save();
+
+        console.log('News post updated successfully.');
+        return { success: true, message: 'News post updated successfully.', news: newsPost };
+    } catch (error) {
+        console.error('Error updating news post:', error);
+        return { success: false, message: 'Error updating news post.', error: error.message };
+    }
+};
+
+
+
+
 const blog = {
-    createNewsPost
+    createNewsPost,
+    updateNewsPost
 }
 module.exports = blog

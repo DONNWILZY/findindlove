@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const Vote = require('../models/Votes');
+const Vote = require('../models/Vote');
 const Form = require('../models/Form');
 const News = require('../models/News');
 const VideoContent = require('../models/VideoContent');
@@ -7,6 +7,8 @@ const HouseMate = require('../models/User');
 const Post = require('../models/Post');
 const Season = require('../models/Season');
 const Notification = require('../models/Notification');
+
+
 
 
 

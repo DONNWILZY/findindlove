@@ -54,9 +54,18 @@ router.post('/create', verifyToken,checkPermission('create_News'), (req, res) =>
 
 
 
-  // router.get('/create', verifyToken, createNewsPost, (req, res) => {
-  //   // res.send('');
-  // });
+router.put('/update/:postId', verifyToken, async (req, res) => {
+  const postId = req.params.postId;
+  const updatedFields = req.body.updatedFields; // Fields to update
+  const userMentions = req.body.userMentions; // Mentions in the content
+  
+  try {
+      const result = await updateNewsPost(postId, updatedFields, userMentions);
+      res.json(result);
+  } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
 
 
 
