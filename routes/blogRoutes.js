@@ -9,7 +9,7 @@ const {verifyToken,
     checkPermission} = require('../middlewares/authMiddleware');
 
 
-const {createNewsPost} = require('../controllers/blogController');
+const {createNewsPost, updateNews} = require('../controllers/blogController');
 
 // route to fill a form
 // router.post('/create', verifyToken, createNewsPost);
@@ -54,18 +54,38 @@ router.post('/create', verifyToken,checkPermission('create_News'), (req, res) =>
 
 
 
-router.put('/update/:postId', verifyToken, async (req, res) => {
+router.put('/update/:postId', async (req, res) => {
   const postId = req.params.postId;
-  const updatedFields = req.body.updatedFields; // Fields to update
-  const userMentions = req.body.userMentions; // Mentions in the content
-  
+  const {
+      userId,
+      title,
+      content,
+      images,
+      featuredImage,
+      keywords,
+      season,
+      autoSchedule,
+      scheduledDate,
+      allowComment,
+      allowReaction,
+      Promo,
+      featured,
+      latest,
+      exclusive,
+      notifyAdmin,
+      notifyUser,
+      manualAuthorName,
+      userMentions // Add userMentions to the request body
+  } = req.body;
+
   try {
-      const result = await updateNewsPost(postId, updatedFields, userMentions);
+      const result = await updateNews(userId, title, content, images, featuredImage, keywords, season, autoSchedule, scheduledDate, allowComment, allowReaction, Promo, featured, latest, exclusive, notifyAdmin, notifyUser, manualAuthorName, userMentions, postId);
       res.json(result);
   } catch (error) {
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+      res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
   }
 });
+
 
 
 

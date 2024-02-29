@@ -23,7 +23,7 @@ initializeRoutes(app);
 const { port, currentUrl } = require('./config/urlAndPort');
 
 // deault route for testing
-app.get('/', verifyToken, checkPermission('create_season'), (req, res) =>{
+app.get('/', verifyToken,  (req, res) =>{
   res.send( `DEFAULT ROUTE IS WORKING`);
   
 });

@@ -102,43 +102,68 @@ const extractMentions = (content) => {
 
 
 
-const updateNewsPost = async (postId, updatedFields, userMentions) => {
+const updateNews = async (userId, title, content, images, featuredImage, keywords, season, autoSchedule, scheduledDate, allowComment, allowReaction, Promo, featured, latest, exclusive, notifyAdmin, notifyUser, manualAuthorName, userMentions, postId) => {
     try {
-        // Fetch the news post by ID
-        let newsPost = await News.findById(postId);
-        if (!newsPost) {
-            throw new Error('News post not found.');
-        }
+        // Check if postId exists, if yes, update the post; otherwise, create a new post
+        let news;
+        if (postId) {
+            // Update existing post
+            news = await News.findById(postId);
+            if (!news) {
+                throw new Error('Post not found');
+            }
 
-        // Update the fields
-        Object.assign(newsPost, updatedFields);
+            // Update fields
+            news.title = title;
+            news.content = content;
+            // Update other fields accordingly...
 
-        // Replace mentions in the content
-        if (userMentions && userMentions.length > 0) {
-            let modifiedContent = newsPost.content;
-            userMentions.forEach((mention) => {
-                const mentionRegex = new RegExp(`@${mention.username}`, 'g');
-                modifiedContent = modifiedContent.replace(mentionRegex, `@${mention.username}`);
+            // Save the updated post
+            await news.save();
+        } else {
+            // Create new post
+            news = new News({
+                userId,
+                title,
+                content,
+                images,
+                featuredImage,
+                keywords,
+                season,
+                autoSchedule,
+                scheduledDate,
+                allowComment,
+                allowReaction,
+                Promo,
+                featured,
+                latest,
+                exclusive,
+                notifyAdmin,
+                notifyUser,
+                manualAuthorName,
+                userMentions: Array.isArray(userMentions) ? userMentions : [] // Ensure userMentions is an array
             });
-            newsPost.content = modifiedContent;
+
+            // Save the new post
+            await news.save();
         }
 
-        // Save the updated news post
-        await newsPost.save();
-
-        console.log('News post updated successfully.');
-        return { success: true, message: 'News post updated successfully.', news: newsPost };
+        return { success: true, message: 'News post updated successfully.', news };
     } catch (error) {
-        console.error('Error updating news post:', error);
-        return { success: false, message: 'Error updating news post.', error: error.message };
+        console.error('Error creating or updating news post:', error);
+        throw error;
     }
 };
 
 
 
 
+
+
 const blog = {
     createNewsPost,
-    updateNewsPost
+    updateNews,
+
 }
 module.exports = blog
+

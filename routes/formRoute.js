@@ -16,11 +16,13 @@ const {
     getFormQuestionsAndResponsesForUser
 } = require('../controllers/formControllers'); // Import the createForm function
 
-const {verifyToken, 
+const {
+    verifyToken, 
     verifyUser, 
     verifyAdmin, 
     verifyStaff, 
-    verifySuperAdmin, checkPermission
+    verifySuperAdmin, 
+    checkPermission
 } = require('../middlewares/authMiddleware');
 
 
