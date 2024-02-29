@@ -1,11 +1,8 @@
-// const mongoose = require('mongoose');
-// const News = require('../models/News');
-// const Season = require('../models/Season');
-// const User = require('../models/User');
-// const houseMates = require('../models/User');
+const mongoose = require('mongoose');
 const Models = require('../models');
 const News = Models.news;
 const User = Models.user;
+const Reaction = Models.reaction
 const Season = Models.season;
 
 
@@ -116,10 +113,20 @@ const updateNews = async (userId, title, content, images, featuredImage, keyword
             // Update fields
             news.title = title;
             news.content = content;
-            // Update other fields accordingly...
 
-            // Save the updated post
-            await news.save();
+            // Check if autoSchedule is true and scheduledDate is provided
+            if (autoSchedule && scheduledDate) {
+                news.autoSchedule = autoSchedule;
+                news.scheduledDate = scheduledDate;
+                news.scheduleStatus = 'Scheduled'; // Update schedule status
+            } else {
+                // If autoSchedule is false or scheduledDate is not provided
+                news.autoSchedule = false;
+                news.scheduledDate = null;
+                news.scheduleStatus = 'Posted'; // Update schedule status
+            }
+
+            // Update other fields accordingly...
         } else {
             // Create new post
             news = new News({
@@ -141,19 +148,80 @@ const updateNews = async (userId, title, content, images, featuredImage, keyword
                 notifyAdmin,
                 notifyUser,
                 manualAuthorName,
-                userMentions: Array.isArray(userMentions) ? userMentions : [] // Ensure userMentions is an array
+                userMentions
             });
 
-            // Save the new post
-            await news.save();
+            // Set schedule status
+            news.scheduleStatus = autoSchedule ? 'Scheduled' : 'Posted';
         }
 
-        return { success: true, message: 'News post updated successfully.', news };
+         // Find mentioned users based on the content
+         const mentionedUsers = await User.find({ username: { $in: extractMentions(content) } });
+
+         // Extract usernames from mentioned users
+         const mentionedUsernames = mentionedUsers.map(user => user.username);
+ 
+         // Replace mentions of users in the content
+         let modifiedContent = content;
+         mentionedUsernames.forEach(username => {
+             const mentionRegex = new RegExp(`@${username}`, 'g');
+             modifiedContent = modifiedContent.replace(mentionRegex, `@${username}`); // Replace @username with @username
+         });
+
+        // Update or create the news post instance
+        news.content = modifiedContent; // Use modified content with mentions included
+        await news.save();
+
+        return { success: true, message: 'News post created or updated successfully.', news };
     } catch (error) {
         console.error('Error creating or updating news post:', error);
         throw error;
     }
 };
+
+
+
+const reactToNewsPost = async (userId, reactionType, newsId) => {
+    try {
+        // Check if reactions are allowed for the news post
+        const newsPost = await News.findById(newsId);
+        if (!newsPost) {
+            throw new Error('News post not found.');
+        }
+        if (!newsPost.allowReaction) {
+            return { success: false, message: 'Reactions not allowed for this news post.' };
+        }
+
+        // Check if the user has already reacted to the news post
+        const existingReaction = await Reaction.findOne({
+            user: userId,
+            activityType: 'news',
+            activityId: newsId
+        });
+        if (existingReaction) {
+            return { success: false, message: 'User has already reacted to this news post.' };
+        }
+
+        // Create a new reaction document
+        const reaction = new Reaction({
+            user: userId,
+            reactionType,
+            activityType: 'news',
+            activityId: newsId
+        });
+
+        // Save the reaction to the database
+        const savedReaction = await reaction.save();
+
+        // Return the created reaction document
+        return { success: true, message: 'Reaction added successfully.', reaction: savedReaction };
+    } catch (error) {
+        console.error('Error reacting to news post:', error);
+        return { success: false, message: 'Error reacting to news post.', error: error.message };
+    }
+};
+
+
 
 
 
@@ -163,6 +231,7 @@ const updateNews = async (userId, title, content, images, featuredImage, keyword
 const blog = {
     createNewsPost,
     updateNews,
+    reactToNewsPost,
 
 }
 module.exports = blog

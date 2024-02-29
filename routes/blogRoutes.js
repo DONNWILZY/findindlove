@@ -9,7 +9,7 @@ const {verifyToken,
     checkPermission} = require('../middlewares/authMiddleware');
 
 
-const {createNewsPost, updateNews} = require('../controllers/blogController');
+const {createNewsPost, updateNews, reactToNewsPost} = require('../controllers/blogController');
 
 // route to fill a form
 // router.post('/create', verifyToken, createNewsPost);
@@ -83,6 +83,18 @@ router.put('/update/:postId', async (req, res) => {
       res.json(result);
   } catch (error) {
       res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+});
+
+// Route to react to a news post
+router.post('/react', async (req, res) => {
+  try {
+      const { userId, reactionType, newsId } = req.body;
+      const reactionResult = await reactToNewsPost(userId, reactionType, newsId);
+      res.json(reactionResult);
+  } catch (error) {
+      console.error('Error in reacting to news post:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 });
 
