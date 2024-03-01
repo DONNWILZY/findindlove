@@ -9,7 +9,7 @@ const {verifyToken,
     checkPermission} = require('../middlewares/authMiddleware');
 
 
-const {createNewsPost, updateNews, reactToNewsPost} = require('../controllers/blogController');
+const {createNewsPost, updateNews, reactToNewsPost, addCommentToNewsPost, reactToComment} = require('../controllers/blogController');
 
 // route to fill a form
 // router.post('/create', verifyToken, createNewsPost);
@@ -98,6 +98,44 @@ router.post('/react', async (req, res) => {
   }
 });
 
+// POST route to add a comment to a news post
+router.post('/comment/:newsId', async (req, res) => {
+  try {
+      const { userId, content } = req.body;
+      const { newsId } = req.params;
+      
+      const result = await addCommentToNewsPost(userId, content, newsId);
+      
+      if (result.success) {
+          res.status(201).json(result);
+      } else {
+          res.status(400).json(result);
+      }
+  } catch (error) {
+      console.error('Error adding comment to news post:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+});
+
+
+// Route to react to a comment
+router.post('/react/:commentId/', async (req, res) => {
+  try {
+      const { userId, reactionType } = req.body;
+      const { commentId } = req.params;
+      
+      const reactionResult = await reactToComment(userId, reactionType, commentId);
+      
+      if (reactionResult.success) {
+          return res.status(200).json(reactionResult);
+      } else {
+          return res.status(400).json(reactionResult);
+      }
+  } catch (error) {
+      console.error('Error in reacting to comment:', error);
+      return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+});
 
 
 

@@ -4,6 +4,7 @@ const News = Models.news;
 const User = Models.user;
 const Reaction = Models.reaction
 const Season = Models.season;
+const Comment = Models.comment;
 
 
 
@@ -181,7 +182,7 @@ const updateNews = async (userId, title, content, images, featuredImage, keyword
 
 
 
-const reactToNewsPost = async (userId, reactionType, newsId) => {
+const reactToNewsPost = async (userId, newReactionType, newsId) => {
     try {
         // Check if reactions are allowed for the news post
         const newsPost = await News.findById(newsId);
@@ -192,34 +193,124 @@ const reactToNewsPost = async (userId, reactionType, newsId) => {
             return { success: false, message: 'Reactions not allowed for this news post.' };
         }
 
-        // Check if the user has already reacted to the news post
-        const existingReaction = await Reaction.findOne({
-            user: userId,
-            activityType: 'news',
-            activityId: newsId
-        });
-        if (existingReaction) {
-            return { success: false, message: 'User has already reacted to this news post.' };
+        // Find existing reaction by the user on the news post
+        const existingReaction = await Reaction.findOne({ user: userId, activityType: 'news', activityId: newsId });
+
+        // Check if the user has already reacted to the news post with the same reaction type
+        if (existingReaction && existingReaction.reactionType === newReactionType) {
+            // If the user has already reacted with the same reaction type, unreact
+            await Reaction.deleteOne({ _id: existingReaction._id }); // Remove the existing reaction document
+            return { success: true, message: 'User unreacted successfully.' };
         }
 
-        // Create a new reaction document
-        const reaction = new Reaction({
-            user: userId,
-            reactionType,
-            activityType: 'news',
-            activityId: newsId
-        });
+        // If the user has not already reacted or reacted with a different type, proceed to react
+        if (existingReaction) {
+            // If the user has already reacted with a different type, update the reaction
+            existingReaction.reactionType = newReactionType;
+            const updatedReaction = await existingReaction.save();
+            return { success: true, message: 'Reaction updated successfully.', reaction: updatedReaction };
+        } else {
+            // Create a new reaction document
+            const reaction = new Reaction({
+                user: userId,
+                reactionType: newReactionType,
+                activityType: 'news',
+                activityId: newsId
+            });
 
-        // Save the reaction to the database
-        const savedReaction = await reaction.save();
+            // Save the new reaction to the database
+            const savedReaction = await reaction.save();
 
-        // Return the created reaction document
-        return { success: true, message: 'Reaction added successfully.', reaction: savedReaction };
+            // Return the created reaction document
+            return { success: true, message: 'Reaction added successfully.', reaction: savedReaction };
+        }
     } catch (error) {
         console.error('Error reacting to news post:', error);
         return { success: false, message: 'Error reacting to news post.', error: error.message };
     }
 };
+
+
+const addCommentToNewsPost = async (userId, content, newsId) => {
+    try {
+        // Check if commenting is allowed for the news post
+        const newsPost = await News.findById(newsId);
+        if (!newsPost) {
+            throw new Error('News post not found.');
+        }
+        if (!newsPost.allowComment) {
+            return { success: false, message: 'Commenting is not allowed for this news post.' };
+        }
+
+        // Create a new comment document
+        const comment = new Comment({
+            user: userId,
+            content,
+            activityType: 'news',
+            activityId: newsId
+        });
+
+        // Save the new comment to the database
+        const savedComment = await comment.save();
+
+        // Return success message and the saved comment
+        return { success: true, message: 'Comment added successfully.', comment: savedComment };
+    } catch (error) {
+        console.error('Error adding comment to news post:', error);
+        return { success: false, message: 'Error adding comment to news post.', error: error.message };
+    }
+};
+
+const reactToComment = async (userId, newReactionType, commentId) => {
+    try {
+        // Check if reactions are allowed for the comment
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            throw new Error('Comment not found.');
+        }
+
+        // Find existing reaction by the user on the comment
+        const existingReaction = await Reaction.findOne({ user: userId, activityType: 'newsComment', activityId: commentId });
+
+         // Check if the user has already reacted to the news post with the same reaction type
+         if (existingReaction && existingReaction.reactionType === newReactionType) {
+            // If the user has already reacted with the same reaction type, unreact
+            await Reaction.deleteOne({ _id: existingReaction._id }); // Remove the existing reaction document
+            return { success: true, message: 'User unreacted successfully.' };
+        }
+
+        // If the user has not already reacted or reacted with a different type, proceed to react
+        if (existingReaction) {
+            // If the user has already reacted with a different type, update the reaction
+            existingReaction.reactionType = newReactionType;
+            const updatedReaction = await existingReaction.save();
+            return { success: true, message: 'Reaction updated successfully.', reaction: updatedReaction };
+        } else {
+            // Create a new reaction document
+            const reaction = new Reaction({
+                user: userId,
+                reactionType: newReactionType,
+                activityType: 'newsComment',
+                activityId: commentId
+            });
+
+            // Save the new reaction to the database
+            const savedReaction = await reaction.save();
+
+            // Return the created reaction document
+            return { success: true, message: 'Reaction added successfully.', reaction: savedReaction };
+        }
+    } catch (error) {
+        console.error('Error reacting to comment:', error);
+        return { success: false, message: 'Error reacting to comment.', error: error.message };
+    }
+};
+
+
+
+
+
+
 
 
 
@@ -232,6 +323,9 @@ const blog = {
     createNewsPost,
     updateNews,
     reactToNewsPost,
+    addCommentToNewsPost,
+    reactToComment
+    
 
 }
 module.exports = blog
