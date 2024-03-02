@@ -303,10 +303,17 @@ const reactToComment = async (userId, newReactionType, commentId) => {
         // Find existing reaction by the user on the comment
         const existingReaction = await Reaction.findOne({ user: userId, activityType: 'newsComment', activityId: commentId });
 
-         // Check if the user has already reacted to the news post with the same reaction type
-         if (existingReaction && existingReaction.reactionType === newReactionType) {
+        // Check if the user has already reacted to the comment with the same reaction type
+        if (existingReaction && existingReaction.reactionType === newReactionType) {
             // If the user has already reacted with the same reaction type, unreact
             await Reaction.deleteOne({ _id: existingReaction._id }); // Remove the existing reaction document
+
+            // Remove reaction from user's reactions array
+            await User.findByIdAndUpdate(userId, { $pull: { reactions: existingReaction._id } });
+
+            // Remove reaction from comment's reactions array
+            await Comment.findByIdAndUpdate(commentId, { $pull: { reactions: existingReaction._id } });
+
             return { success: true, message: 'User unreacted successfully.' };
         }
 
@@ -315,6 +322,15 @@ const reactToComment = async (userId, newReactionType, commentId) => {
             // If the user has already reacted with a different type, update the reaction
             existingReaction.reactionType = newReactionType;
             const updatedReaction = await existingReaction.save();
+
+            // Update reaction in user's reactions array
+            await User.findByIdAndUpdate(userId, { $pull: { reactions: existingReaction._id } });
+            await User.findByIdAndUpdate(userId, { $push: { reactions: updatedReaction._id } });
+
+            // Update reaction in comment's reactions array
+            await Comment.findByIdAndUpdate(commentId, { $pull: { reactions: existingReaction._id } });
+            await Comment.findByIdAndUpdate(commentId, { $push: { reactions: updatedReaction._id } });
+
             return { success: true, message: 'Reaction updated successfully.', reaction: updatedReaction };
         } else {
             // Create a new reaction document
@@ -328,6 +344,12 @@ const reactToComment = async (userId, newReactionType, commentId) => {
             // Save the new reaction to the database
             const savedReaction = await reaction.save();
 
+            // Add reaction to user's reactions array
+            await User.findByIdAndUpdate(userId, { $push: { reactions: savedReaction._id } });
+
+            // Add reaction to comment's reactions array
+            await Comment.findByIdAndUpdate(commentId, { $push: { reactions: savedReaction._id } });
+
             // Return the created reaction document
             return { success: true, message: 'Reaction added successfully.', reaction: savedReaction };
         }
@@ -336,6 +358,7 @@ const reactToComment = async (userId, newReactionType, commentId) => {
         return { success: false, message: 'Error reacting to comment.', error: error.message };
     }
 };
+
 
 
 const replyToComment = async (userId, content, commentId) => {
