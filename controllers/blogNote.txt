@@ -201,13 +201,6 @@ const reactToNewsPost = async (userId, newReactionType, newsId) => {
         if (existingReaction && existingReaction.reactionType === newReactionType) {
             // If the user has already reacted with the same reaction type, unreact
             await Reaction.deleteOne({ _id: existingReaction._id }); // Remove the existing reaction document
-
-            // Remove reaction from user's reactions array
-            await User.findByIdAndUpdate(userId, { $pull: { reactions: existingReaction._id } });
-
-            // Remove reaction from news post's reactions array
-            await News.findByIdAndUpdate(newsId, { $pull: { reactions: existingReaction._id } });
-
             return { success: true, message: 'User unreacted successfully.' };
         }
 
@@ -216,15 +209,6 @@ const reactToNewsPost = async (userId, newReactionType, newsId) => {
             // If the user has already reacted with a different type, update the reaction
             existingReaction.reactionType = newReactionType;
             const updatedReaction = await existingReaction.save();
-
-            // Update reaction in user's reactions array
-            await User.findByIdAndUpdate(userId, { $pull: { reactions: existingReaction._id } });
-            await User.findByIdAndUpdate(userId, { $push: { reactions: updatedReaction._id } });
-
-            // Update reaction in news post's reactions array
-            await News.findByIdAndUpdate(newsId, { $pull: { reactions: existingReaction._id } });
-            await News.findByIdAndUpdate(newsId, { $push: { reactions: updatedReaction._id } });
-
             return { success: true, message: 'Reaction updated successfully.', reaction: updatedReaction };
         } else {
             // Create a new reaction document
@@ -238,12 +222,6 @@ const reactToNewsPost = async (userId, newReactionType, newsId) => {
             // Save the new reaction to the database
             const savedReaction = await reaction.save();
 
-            // Add reaction to user's reactions array
-            await User.findByIdAndUpdate(userId, { $push: { reactions: savedReaction._id } });
-
-            // Add reaction to news post's reactions array
-            await News.findByIdAndUpdate(newsId, { $push: { reactions: savedReaction._id } });
-
             // Return the created reaction document
             return { success: true, message: 'Reaction added successfully.', reaction: savedReaction };
         }
@@ -252,7 +230,6 @@ const reactToNewsPost = async (userId, newReactionType, newsId) => {
         return { success: false, message: 'Error reacting to news post.', error: error.message };
     }
 };
-
 
 
 const addCommentToNewsPost = async (userId, content, newsId) => {
@@ -277,12 +254,6 @@ const addCommentToNewsPost = async (userId, content, newsId) => {
         // Save the new comment to the database
         const savedComment = await comment.save();
 
-        // Update News schema - push the comment ID to the comments array
-        await News.findByIdAndUpdate(newsId, { $push: { comments: savedComment._id } });
-
-        // Update User schema - push the comment ID to the comments array
-        await User.findByIdAndUpdate(userId, { $push: { comments: savedComment._id } });
-
         // Return success message and the saved comment
         return { success: true, message: 'Comment added successfully.', comment: savedComment };
     } catch (error) {
@@ -290,7 +261,6 @@ const addCommentToNewsPost = async (userId, content, newsId) => {
         return { success: false, message: 'Error adding comment to news post.', error: error.message };
     }
 };
-
 
 const reactToComment = async (userId, newReactionType, commentId) => {
     try {

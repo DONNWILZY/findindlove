@@ -22,7 +22,7 @@ const CommentReplySchema = new mongoose.Schema({
     activityType: {
         type: String,
         required: true,
-        enum: ['post', 'news', 'videoContent', 'vote' ]
+        enum: ['postComment', 'newsComment', 'videoContentComment', 'voteComment' ]
     },
 
     activityId: {

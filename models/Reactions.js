@@ -14,7 +14,7 @@ const ReactionSchema = new mongoose.Schema({
     activityType: {
         type: String,
         required: true,
-        enum: ['post', 'news', 'videoContent', 'postComment', 'newsComment', 'voteComment', 'reply' ]
+        enum: ['post', 'news', 'videoContent', 'postComment', 'newsComment', 'voteComment', 'commentReply' ]
     },
     activityId: {
         type: mongoose.Schema.Types.ObjectId,

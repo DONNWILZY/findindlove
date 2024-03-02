@@ -9,7 +9,14 @@ const {verifyToken,
     checkPermission} = require('../middlewares/authMiddleware');
 
 
-const {createNewsPost, updateNews, reactToNewsPost, addCommentToNewsPost, reactToComment} = require('../controllers/blogController');
+const {createNewsPost, 
+  updateNews, 
+  reactToNewsPost, 
+  addCommentToNewsPost, 
+  reactToComment, 
+  replyToComment, 
+  reactToCommentReply,
+  getNewsWithCommentsAndReplies} = require('../controllers/blogController');
 
 // route to fill a form
 // router.post('/create', verifyToken, createNewsPost);
@@ -136,6 +143,47 @@ router.post('/react/:commentId/', async (req, res) => {
       return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 });
+
+
+
+router.post('/comment/reply/:commentId', async (req, res) => {
+  const { userId, content } = req.body;
+  const { commentId } = req.params;
+
+  try {
+      const result = await replyToComment(userId, content, commentId);
+      res.status(200).json(result);
+  } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+});
+
+
+// Route to react to a comment reply
+
+router.post('/ract/reply/:replyId', async (req, res) => {
+  const { userId, newReactionType, replyId } = req.body;
+  try {
+      const reactionResult = await reactToCommentReply(userId, newReactionType, replyId);
+      res.json(reactionResult);
+  } catch (error) {
+      console.error('Error reacting to comment reply:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+});
+
+// Route to get a single news post with comments, replies, and reactions
+router.get('/news/:newsId', async (req, res) => {
+    const newsId = req.params.newsId;
+    try {
+        const newsPost = await getNewsWithCommentsAndReplies(newsId);
+        res.json(newsPost);
+    } catch (error) {
+        console.error('Error fetching news post with comments and replies:', error);
+        res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+});
+
 
 
 
