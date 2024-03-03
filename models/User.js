@@ -74,11 +74,11 @@ const UserSchema = new mongoose.Schema({
     //   type: Number,
     //   default: 0,
     // },
-    currency: {
-      type: String,
-      enums: ['USD', 'NGD'],
-      default: 'NGN',
-    },
+    // currency: {
+    //   type: String,
+    //   enums: ['USD', 'NGD'],
+    //   default: 'NGN',
+    // },
     votePoints: {
       type: Number,
       default: 0,

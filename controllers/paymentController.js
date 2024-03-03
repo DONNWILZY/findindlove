@@ -10,7 +10,7 @@ const OfflinePayment = require('../models/OfflinePayment');
 /// functon ot generate shortId
 const generateShortId = require('../Utilities/generateShortId');
 //currency Conveter
-const convertToNGN = require('../utilities/currencyConverter');
+const convertToNGN = require('../Utilities/currencyConverter');
 
 
 

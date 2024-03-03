@@ -10,6 +10,7 @@ const AdminSettingsSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    
     minDepositAmount: {
         type: Number,
         unique: true,

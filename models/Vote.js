@@ -36,6 +36,14 @@ const VoteSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    allowComment: {
+        type: Boolean,
+        default: true
+    },
+    allowReaction: {
+        type: Boolean,
+        default: true
+    },
     votes: [{
         voter: {
             type: mongoose.Schema.Types.ObjectId,

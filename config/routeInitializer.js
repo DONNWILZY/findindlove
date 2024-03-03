@@ -17,6 +17,8 @@ const settingsRoute = require('../routes/adminSettingsRoute');
 const paymentRoute = require('../routes/paymentRoute');
 //user Route
 const userRoute = require('../routes/userRoute');
+//poll Route
+const pollRoute = require('../routes/voteRoute');
 
 function initializeRoutes(app) {
 
@@ -34,6 +36,8 @@ function initializeRoutes(app) {
   app.use('/api/payment', paymentRoute);
   // user route
   app.use('/api/user', userRoute);
+  // user route
+  app.use('/api/poll', pollRoute);
 
 
 
