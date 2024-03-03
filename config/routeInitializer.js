@@ -13,6 +13,8 @@ const formRoute = require('../routes/formRoute');
 const blogRoute = require('../routes/blogRoutes');
 //Settings
 const settingsRoute = require('../routes/adminSettingsRoute');
+//payment Route
+const paymentRoute = require('../routes/paymentRoute');
 
 function initializeRoutes(app) {
 
@@ -26,6 +28,8 @@ function initializeRoutes(app) {
    app.use('/api/blog', blogRoute);
    // settimgs route
    app.use('/api/settings', settingsRoute);
+    // payment route
+    app.use('/api/payment', paymentRoute);
 
   
   

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Transaction = require('./Transaction');
 
-const userSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
 
   systemNumber: {
     type: Number,
@@ -69,10 +70,10 @@ const userSchema = new mongoose.Schema({
   },
 
   wallet: {
-    balance: {
-      type: Number,
-      default: 0,
-    },
+    // balance: {
+    //   type: Number,
+    //   default: 0,
+    // },
     currency: {
       type: String,
       enums: ['USD', 'NGD'],
@@ -315,6 +316,37 @@ const userSchema = new mongoose.Schema({
 },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   });
 
-module.exports = mongoose.model('User', userSchema);
+
+  UserSchema.virtual('wallet.balance').get(async function() {
+    try {
+        // Fetch all completed incoming transactions (deposits, payments received)
+        const incomingTransactions = await Transaction.find({ user: this._id, type: 'income', status: 'completed' });
+
+        // Fetch all completed outgoing transactions (withdrawals, payments made)
+        const outgoingTransactions = await Transaction.find({ user: this._id, type: 'expense', status: 'completed' });
+
+        // Calculate total incoming amount
+        const totalIncomingAmount = incomingTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
+
+        // Calculate total outgoing amount
+        const totalOutgoingAmount = outgoingTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
+
+        // Calculate balance by subtracting total outgoing from total incoming
+        const balance = totalIncomingAmount - totalOutgoingAmount;
+
+        return balance;
+    } catch (error) {
+        console.error('Error calculating user balance:', error);
+        throw new Error('Failed to calculate user balance.');
+    }
+});
+
+
+
+
+const User = mongoose.model('User', UserSchema);
+module.exports = User

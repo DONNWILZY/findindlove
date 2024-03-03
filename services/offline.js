@@ -1,4 +1,6 @@
+
 // services/offlinePayment.js
+const OfflinePayment = require('../models/OfflinePayment');
 
 // Function to submit offline payment proof
 const submitProof = async (userId, amount, proofImage) => {
@@ -6,15 +8,19 @@ const submitProof = async (userId, amount, proofImage) => {
         // Save offline payment record to database
         const offlinePayment = await OfflinePayment.create({
             user: userId,
-            amount,
-            proofImage,
-            status: 'Pending',
+            amountDeposited: amount,
+            proofImage: proofImage,
+            paymentStatus: 'Pending',
         });
         return offlinePayment;
     } catch (error) {
+        console.error('Error submitting offline payment proof:', error);
         throw new Error('Failed to submit offline payment proof');
     }
 };
+
+
+
 
 module.exports = {
     submitProof,

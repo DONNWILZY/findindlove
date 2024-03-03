@@ -1,4 +1,4 @@
-
+// models/Transaction.js
 const mongoose = require('mongoose');
 
 const TransactionSchema = new mongoose.Schema({
@@ -20,6 +20,11 @@ const TransactionSchema = new mongoose.Schema({
         type: String,
         enum: ['income', 'expense'],
         required: true
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'failed', 'completed', 'declined'],
+        default: 'pending'
     },
     description: {
         type: String
