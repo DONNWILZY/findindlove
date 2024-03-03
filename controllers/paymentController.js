@@ -163,6 +163,38 @@ const getTransaction = async (req, res) => {
 }
 
 
+const getSingleTransaction = async (req, res) => {
+    try {
+        const { userId, transactionId } = req.params;
+        
+        // Find the transaction for the specified user ID and transaction ID, and populate the offline payment
+        const transaction = await Transaction.findOne({ user: userId, _id: transactionId }).populate('offline');
+        
+        if (!transaction) {
+            return res.status(404).json({ error: 'Transaction not found' });
+        }
+
+        return res.status(200).json({ transaction });
+    } catch (error) {
+        console.error('Error fetching transaction:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+// Function to fetch all transactions for a user
+const getAllTransactionsForUser = async (userId) => {
+    try {
+        // Query the Transaction model to find all transactions for the specified user
+        const transactions = await Transaction.find({ user: userId }).populate('offline');
+        return transactions;
+    } catch (error) {
+        console.error('Error fetching transactions for user:', error);
+        throw new Error('Failed to fetch transactions for user');
+    }
+};
+
+
 
 
 
@@ -180,5 +212,5 @@ const getTransaction = async (req, res) => {
 
 
 module.exports = {
-    initiatePayment, offline,  getAllTransactions, getTransaction
+    initiatePayment, offline,  getAllTransactions, getTransaction, getSingleTransaction, getAllTransactionsForUser
 };
