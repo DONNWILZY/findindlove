@@ -1,19 +1,14 @@
-import User from '../models/User';
+const User = require ('../models/User');
 
 const getWalletBalance = async (userId) => {
     try {
         const user = await User.findById(userId);
-
         if (!user) {
             throw new Error('User not found');
         }
-
-        const walletBalance = user.balance;
-
-        return walletBalance;
+        return user.wallet.balance;
     } catch (error) {
-        console.error('Error fetching wallet balance:', error.message);
-        throw error;
+        throw new Error('Failed to fetch wallet balance');
     }
 };
 

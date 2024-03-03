@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const {getWalletBalance} = require('../controllers/userController');
 
+
 // Route to get wallet balance of a user
-router.get('/users/:userId/walletBalance', async (req, res) => {
+router.get('/balance/:userId', async (req, res) => {
     try {
         const userId = req.params.userId;
         const walletBalance = await getWalletBalance(userId);

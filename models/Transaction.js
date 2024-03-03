@@ -28,7 +28,13 @@ const TransactionSchema = new mongoose.Schema({
     },
     description: {
         type: String
-    }
+    },
+
+    offline:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'OfflinePayment',
+    },
+
 }, {
     timestamps: true 
 });

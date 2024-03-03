@@ -15,6 +15,8 @@ const blogRoute = require('../routes/blogRoutes');
 const settingsRoute = require('../routes/adminSettingsRoute');
 //payment Route
 const paymentRoute = require('../routes/paymentRoute');
+//user Route
+const userRoute = require('../routes/userRoute');
 
 function initializeRoutes(app) {
 
@@ -22,17 +24,19 @@ function initializeRoutes(app) {
   app.use('/api/auth', authRoute);
   // Use seasonRote 
   app.use('/api/season', seasonRoute);
-   // Use permissionRoute
-   app.use('/api/permission', permissionRoute);
-   //use form route
-   app.use('/api/blog', blogRoute);
-   // settimgs route
-   app.use('/api/settings', settingsRoute);
-    // payment route
-    app.use('/api/payment', paymentRoute);
+  // Use permissionRoute
+  app.use('/api/permission', permissionRoute);
+  //use form route
+  app.use('/api/blog', blogRoute);
+  // settimgs route
+  app.use('/api/settings', settingsRoute);
+  // payment route
+  app.use('/api/payment', paymentRoute);
+  // user route
+  app.use('/api/user', userRoute);
 
-  
-  
+
+
 }
 
 module.exports = initializeRoutes;

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Transaction = require('./Transaction');
 
 const OfflinePaymentSchema = new mongoose.Schema({
     user: {
@@ -11,6 +12,8 @@ const OfflinePaymentSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+
+  
     paymentStatus: {
         type: String,
         enum: ['Pending', 'Approved', 'Declined'],
@@ -24,9 +27,20 @@ const OfflinePaymentSchema = new mongoose.Schema({
       textProof: {
         type: String,
       },
+
+      
+    currency: {
+      type: String,
+      enum: ['NGN', 'USD', 'EUR'],
+      // required: true
+  },
+  
     paymentApprovedDate: {
         type: Date
     },
+
+    
+
     createdAt: {
         type: Date,
         default: Date.now
