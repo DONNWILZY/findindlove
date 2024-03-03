@@ -11,6 +11,8 @@ const permissionRoute = require('../routes/PermissionRoute');
 const formRoute = require('../routes/formRoute');
 // Blog route for new, video content
 const blogRoute = require('../routes/blogRoutes');
+//Settings
+const settingsRoute = require('../routes/adminSettingsRoute');
 
 function initializeRoutes(app) {
 
@@ -22,6 +24,8 @@ function initializeRoutes(app) {
    app.use('/api/permission', permissionRoute);
    //use form route
    app.use('/api/blog', blogRoute);
+   // settimgs route
+   app.use('/api/settings', settingsRoute);
 
   
   

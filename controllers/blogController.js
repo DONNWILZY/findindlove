@@ -380,6 +380,12 @@ const replyToComment = async (userId, content, commentId) => {
         // Save the new comment reply to the database
         const savedReply = await reply.save();
 
+        // Push the reply ID to the user's reply field
+        await User.findByIdAndUpdate(userId, { $push: { reply: savedReply._id } });
+
+        // Push the reply ID to the comment's replies field
+        await Comment.findByIdAndUpdate(commentId, { $push: { replies: savedReply._id } });
+
         // Return success message and the created reply
         return { success: true, message: 'Reply added successfully.', reply: savedReply };
     } catch (error) {
@@ -387,6 +393,7 @@ const replyToComment = async (userId, content, commentId) => {
         return { success: false, message: 'Error replying to comment.', error: error.message };
     }
 };
+
 
 
 
@@ -405,6 +412,13 @@ const reactToCommentReply = async (userId, newReactionType, replyId) => {
         if (existingReaction && existingReaction.reactionType === newReactionType) {
             // If the user has already reacted with the same reaction type, unreact
             await Reaction.deleteOne({ _id: existingReaction._id }); // Remove the existing reaction document
+
+            // Remove the reaction from the user's reactions field
+            await User.findByIdAndUpdate(userId, { $pull: { reactions: existingReaction._id } });
+
+            // Remove the reaction from the comment reply's reactions field
+            await CommentReply.findByIdAndUpdate(replyId, { $pull: { reactions: existingReaction._id } });
+
             return { success: true, message: 'User unreacted successfully.' };
         }
 
@@ -426,6 +440,12 @@ const reactToCommentReply = async (userId, newReactionType, replyId) => {
             // Save the new reaction to the database
             const savedReaction = await reaction.save();
 
+            // Push the reaction ID to the comment reply's reactions field
+            await CommentReply.findByIdAndUpdate(replyId, { $addToSet: { reactions: savedReaction._id } });
+
+            // Push the reaction ID to the user's reactions field
+            await User.findByIdAndUpdate(userId, { $addToSet: { reactions: savedReaction._id } });
+
             // Return the created reaction document
             return { success: true, message: 'Reaction added successfully.', reaction: savedReaction };
         }
@@ -438,27 +458,40 @@ const reactToCommentReply = async (userId, newReactionType, replyId) => {
 
 
 
-const getNewsWithCommentsAndReplies = async (newsId) => {
-    try {
-        // Find the news post by its ID
-        const newsPost = await News.findById(newsId)
-            .populate({
-                path: 'comments',
-                populate: {
-                    path: 'replies',
-                    populate: {
-                        path: 'reactions'
-                    }
-                }
-            })
-            .populate('reactions'); // Populate reactions directly for the news post
 
-        return newsPost;
+
+const getNewsWithCommentsAndReplies = async (postId) => {
+    try {
+      // 1. Fetch the post
+      const post = await News.findById(postId);
+      if (!post) {
+        return null;
+      }
+  
+      // 2. Fetch comments for the post, populating reactions and replies
+      const comments = await Comment.find({ post_id: post._id }).populate({
+        path: 'reactions replies', // Populate reactions and replies fields in the Comment model
+        populate: {
+          path: 'reactions', // Populate reactions field in the Reaction model for each comment
+        }
+      }).populate({
+        path: 'replies',
+        populate: {
+          path: 'reactions', // Populate reactions field in the Reaction model for each reply
+        }
+      });
+  
+      // 3. Return the populated post
+      return post;
     } catch (error) {
-        console.error('Error retrieving news post with comments and replies:', error);
-        throw error;
+      console.error('Error fetching news post with populated comments:', error);
+      throw error; // Re-throw the error for handling by the caller
     }
 };
+  
+  
+  
+  
 
 
 

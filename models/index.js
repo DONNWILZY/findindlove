@@ -1,7 +1,7 @@
 // models/index.js
 
 // Import all models and export them as a single object
-// const AdminSettings = require('./AdminSetings');
+const AdminSettings = require('./AdminSetings');
 const Comment = require('./Comment');
 const CommentReply = require('./CommentReply');
 const DataSettings = require('./DataSettings');
@@ -28,7 +28,7 @@ const Vote = require('./Vote');
 
 
 module.exports = {
-    // adminSettings: AdminSettings,
+    adminSettings: AdminSettings,
     comment: Comment,
     reply: CommentReply,
     dataSettings: DataSettings,

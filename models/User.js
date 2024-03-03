@@ -286,6 +286,11 @@ const userSchema = new mongoose.Schema({
     ref: 'Notification'
   }],
 
+  reply: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CommentReply'
+  }],
+
   reactions: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Reaction'

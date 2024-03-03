@@ -27,6 +27,6 @@ const UserSettingsSchema = new mongoose.Schema({
 });
 
 
-const UserSettings = mongoose.model('AdminSettings', UserSettingsSchema);
+const UserSettings = mongoose.model('UserSettings', UserSettingsSchema);
 
 module.exports = UserSettings;
