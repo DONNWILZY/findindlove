@@ -12,16 +12,17 @@ const AdminSettingsSchema = new mongoose.Schema({
     },
     minDepositAmount: {
         type: Number,
+        unique: true,
     },
     amountPerVotePoint: {
         type: Number,
-        unique: true, // Only one instance of this field is allowed
+        unique: true,
     },
     currency: {
         type: String,
         enum: ['NGN', 'USD'],
-        default: 'NGN', // Default currency is NGN (Naira)
-        unique: true, // Only one instance of this field is allowed
+        default: 'NGN',
+        unique: true,
     },
 });
 
@@ -40,7 +41,7 @@ AdminSettingsSchema.statics.createOrUpdateField = async function (field, value) 
         adminSettings[field] = value;
 
         // Convert USD to NGN if necessary
-        if (field === 'amountPerVotePoint' && adminSettings.currency === 'USD') {
+        if ((field === 'amountPerVotePoint' || field === 'minDepositAmount') && adminSettings.currency === 'USD') {
             const convertedValue = await convertUSDToNGN(value);
             adminSettings[field] = convertedValue;
         }
