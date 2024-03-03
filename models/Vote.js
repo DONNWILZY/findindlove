@@ -14,6 +14,15 @@ const VoteSchema = new mongoose.Schema({
         ref: 'Season',
         required: true
     },
+    comments: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Comment' 
+    }],
+
+    reactions: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Reaction' 
+    }], 
     houseMates: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Housemate',

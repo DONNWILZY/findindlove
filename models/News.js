@@ -55,6 +55,12 @@ const NewsSchema = new mongoose.Schema({
         type: [Comment.schema],
         default: []
     },
+    // comment: [{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Comment',
+    // }],
+    // comment: [Comment.schema],
+    
     allowComment: {
         type: Boolean,
         default: true
@@ -102,6 +108,8 @@ const NewsSchema = new mongoose.Schema({
         enum: ['Scheduled', 'Posted'],
         default: 'Scheduled' // Default to "Scheduled" indicating articles are initially scheduled
     },
+
+   
 
     analytics: {
         reactionsCount: {

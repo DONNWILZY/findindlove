@@ -11,11 +11,13 @@ const Form = require('./Form');
 const Interest = require('./Interest');
 const News = require('./News');
 const Notification = require('./Notification');
+const OfflinePayment = require('./OfflinePayment');
 const OtpCode = require('./OtpCode');
 const Post = require('./Post');
 const Reaction = require('./Reactions');
 const ReportUser = require('./ReportUser');
 const Season = require('./Season');
+const Transactions = require('./Transaction');
 const User = require('./User');
 const UserNotes = require('./UserNotes');
 const Permission = require('./UserPermission');
@@ -38,12 +40,14 @@ module.exports = {
     interest: Interest,
     news: News,
     notification: Notification,
+    offlinePayment: OfflinePayment,
     opt: OtpCode,
     post: Post,
     reaction: Reaction,
     reportAbuse: ReportUser,
     seasn: Season,
     user: User,
+    transaction: Transactions,
     note: UserNotes,
     permission: Permission,
     userSettings: UserSettings,

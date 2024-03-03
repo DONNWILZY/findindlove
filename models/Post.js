@@ -13,15 +13,21 @@ const PostSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    
     images: {
         type: [String]
     },
-    reactions: {
-        type: [Reaction.schema] // Reference to Reaction schema
-    },
-    comments: {
-        type: [Comment.schema] // Reference to Reaction schema
-    },
+
+    reactions: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Reaction' 
+    }],
+
+    comments: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Comment' 
+    }],
+
     allowComment:{
         type: Boolean,
     },

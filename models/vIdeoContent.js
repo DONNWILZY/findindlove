@@ -44,12 +44,16 @@ const VideoContentSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    reactions: {
-        type: [Reaction.schema] // Reference to Reaction schema
-    },
-    comments: {
-        type: [Comment.schema] // Reference to Comment schema
-    },
+    reactions: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Reaction' 
+    }],
+
+    comments: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Comment' 
+    }], 
+
     analytics: {
         reactionsCount: {
             type: Number,
