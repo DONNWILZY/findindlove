@@ -72,7 +72,7 @@ router.post('/update/:voteId', async (req, res) => {
 // Route to handle user voting
 router.post('/vote', async (req, res) => {
     try {
-        const { userId, voteId, votes } = req.body;
+        const { userId,  voteId, votes} = req.body;
         const success = await voteForHousemates(userId, voteId, votes);
         if (success) {
             return res.status(200).json({ success: true, message: 'Votes recorded successfully.' });

@@ -70,10 +70,10 @@ const UserSchema = new mongoose.Schema({
   },
 
   wallet: {
-    // balance: {
-    //   type: Number,
-    //   default: 0,
-    // },
+    balance: {
+      type: Number,
+      default: 5,
+    },
     currency: {
       type: String,
       enums: ['USD', 'NGD'],
@@ -321,7 +321,7 @@ const UserSchema = new mongoose.Schema({
   });
 
 
-  UserSchema.virtual('wallet.balance').get(function() {
+  UserSchema.virtual('balance').get(function() {
     return new Promise(async (resolve, reject) => {
         try {
             // Fetch all completed incoming transactions (deposits, payments received)

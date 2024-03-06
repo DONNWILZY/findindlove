@@ -235,30 +235,37 @@ const voteForHousemates = async (userId, voteId, votes) => {
             if (adminSettings.allowVoteWithBalance) {
               source = 'balance';
               // Calculate the deduction amount based on the amountPerVotePoint
-              deductionAmount = numberOfVotes * adminSettings.amountPerVotePoint;
-              console.log(user.wallet.balance);
+              const deductionAmount = numberOfVotes * adminSettings.amountPerVotePoint;
+              console.log(`${deductionAmount} ${numberOfVotes} ${adminSettings.amountPerVotePoint}`);
+
               // Check if the user has enough balance
               if (user.wallet.balance < deductionAmount) {
-                console.error('Insufficient balance.');
+                console.error(`Insufficient Balance. you have ₦${user.wallet.balance}. Kindly Fund your account.`);
                 return false; // Return false to indicate failure
               }
+
+              // Deduct the deductionAmount from the user's balance
+              user.wallet.balance -= deductionAmount;
             } else {
               console.error('Voting with balance is not allowed.');
               return false; // Return false to indicate failure
             }
             break;
+
           case 'votePoints':
             if (adminSettings.allowVoteWithVotePoints) {
               source = 'votePoints';
               // Check if the user has enough vote points
               if (user.wallet.votePoints < numberOfVotes) {
-                console.error('Insufficient vote points.');
+                console.error(`Insufficient Vote points. you have ${user.wallet.votePoints} Vote points. Kindy buy more vote Points`);
                 return false; // Return false to indicate failure
               }
             } else {
               console.error('Voting with vote points is not allowed.');
               return false; // Return false to indicate failure
             }
+            // Deduct the numberOfVotes from the user's votePoints
+            user.wallet.votePoints -= numberOfVotes;
             break;
           // Check if voting with referral points is allowed
           case 'referralPoints':
@@ -266,13 +273,15 @@ const voteForHousemates = async (userId, voteId, votes) => {
               source = 'referralPoints';
               // Check if the user has enough referral points
               if (user.wallet.referralPoints < numberOfVotes) {
-                console.error('Insufficient referral points.');
+                console.error(`Insufficient referral points. you have ${user.wallet.referralPoints} referral points. Invite more people`);
                 return false; // Return false to indicate failure
               }
             } else {
               console.error('Voting with referral points is not allowed.');
               return false; // Return false to indicate failure
             }
+            // Deduct the numberOfVotes from the user's referralPoints
+            user.wallet.referralPoints -= numberOfVotes;
             break;
 
 
@@ -281,8 +290,8 @@ const voteForHousemates = async (userId, voteId, votes) => {
             return false; // Return false to indicate failure
         }
 
-        // Deduct the number of votes from the appropriate source
-        user.wallet[source] -= numberOfVotes;
+        // // Deduct the number of votes from the appropriate source
+        // user.wallet[source] -= numberOfVotes;
       }
     }
 
@@ -304,7 +313,7 @@ const voteForHousemates = async (userId, voteId, votes) => {
     // Save updated vote
     await vote.save();
 
-    console.log('Votes recorded successfully.');
+    console.log(`You have Voted succesfully`);
     return true; // Return true to indicate success
   } catch (error) {
     console.error('Error recording votes:', error);
