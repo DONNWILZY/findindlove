@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {offline, getAllTransactions, getTransaction, getSingleTransaction, getAllTransactionsForUser} = require('../controllers/paymentController');
+const {offline, getAllTransactions, getTransaction, getSingleTransaction, getAllTransactionsForUser, purchaseVotePoints} = require('../controllers/paymentController');
 
 // Route to submit offline payment proof
 router.post('/offline', offline);
@@ -26,6 +26,28 @@ router.get('/transactions/:userId', async (req, res) => {
     } catch (error) {
         console.error('Error fetching transactions:', error);
         return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+/// purchase votepoints
+router.post('/purchase/vote', async (req, res) => {
+    try {
+        // Extract userId and votePointsRequested from request body
+        const { userId, votePointsRequested } = req.body;
+
+        // Call purchaseVotePoints function to handle the purchase
+        const result = await purchaseVotePoints(userId, votePointsRequested);
+
+        // Send response based on the result of the purchase operation
+        if (result) {
+            res.status(200).json({ message: `${votePointsRequested} vote points purchased successfully.` });
+        } else {
+            res.status(400).json({ error: 'Failed to purchase vote points.' });
+        }
+    } catch (error) {
+        console.error('Error purchasing vote points:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 

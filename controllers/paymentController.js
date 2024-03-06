@@ -7,6 +7,8 @@ const PayPalService = require('../services/paypal');
 const OfflinePaymentService = require('../services/offline');
 const Transaction = require('../models/Transaction');
 const OfflinePayment = require('../models/OfflinePayment');
+const AdminSettings = require('../models/AdminSetings');
+const User = require('../models/User');
 /// functon ot generate shortId
 const generateShortId = require('../Utilities/generateShortId');
 //currency Conveter
@@ -196,6 +198,66 @@ const getAllTransactionsForUser = async (userId) => {
 
 
 
+//// buy votePoint
+const purchaseVotePoints = async (userId, votePointsRequested) => {
+    try {
+        // Fetch admin settings to get the amount per vote point
+        const adminSettings = await AdminSettings.findById('65e42c2b9f1251620098846a');
+        const amountPerVotePoint = adminSettings.amountPerVotePoint;
+
+        // Calculate total amount based on the number of vote points requested
+        const totalAmount = votePointsRequested * amountPerVotePoint;
+
+        // Fetch user
+        const user = await User.findById(userId);
+
+        // Check if user exists and has a wallet
+        if (!user || !user.wallet.balance) {
+            console.error('User not found or wallet is missing.');
+            return false; // Return false to indicate failure
+        }
+
+        // Check if user has sufficient balance to cover the purchase
+        const balanceAfterPurchase = user.wallet.balance - totalAmount;
+        if (!balanceAfterPurchase && balanceAfterPurchase <=0) {
+            console.error('Insufficient balance.');
+            return false; // Return false to indicate failure
+        }
+
+        // Create a transaction record
+        const transaction = new Transaction({
+            user: userId,
+            transactionId: generateShortId(),
+            type: 'expense',
+            amount: totalAmount,
+            description: `${votePointsRequested} vote points purchased`,
+            status: 'completed'
+        });
+        await transaction.save();
+
+        // Update user's vote points
+        user.wallet.votePoints += votePointsRequested;
+
+        // Deduct the purchase amount from the user's balance
+        user.wallet.balance -= totalAmount;
+
+        // Save updated user
+        await user.save();
+
+        console.log(`${votePointsRequested} vote points purchased successfully.`);
+        return true; // Return true to indicate success
+    } catch (error) {
+        console.error('Error purchasing vote points:', error);
+        return false; // Return false to indicate failure
+    }
+}
+
+
+
+
+
+
+
 
 
 
@@ -212,5 +274,5 @@ const getAllTransactionsForUser = async (userId) => {
 
 
 module.exports = {
-    initiatePayment, offline,  getAllTransactions, getTransaction, getSingleTransaction, getAllTransactionsForUser
+    initiatePayment, offline,  getAllTransactions, getTransaction, getSingleTransaction, getAllTransactionsForUser, purchaseVotePoints
 };

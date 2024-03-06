@@ -431,3 +431,87 @@ const blog = {
 }
 module.exports = blog
 
+
+
+to caalculate the balance of the user
+
+// Virtual property to calculate the balance of the user
+UserSchema.virtual('wallet.balance').get(async function() {
+    try {
+        // Fetch all completed incoming transactions (deposits, payments received)
+        const incomingTransactions = await Transaction.find({ user: this._id, type: 'income', status: 'completed' });
+
+        // Fetch all completed outgoing transactions (withdrawals, payments made)
+        const outgoingTransactions = await Transaction.find({ user: this._id, type: 'expense', status: 'completed' });
+
+        // Calculate total incoming amount
+        const totalIncomingAmount = incomingTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
+
+        // Calculate total outgoing amount
+        const totalOutgoingAmount = outgoingTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
+
+        // Calculate balance by subtracting total outgoing from total incoming
+        const balance = totalIncomingAmount - totalOutgoingAmount;
+
+        return balance;
+    } catch (error) {
+        console.error('Error calculating user balance:', error);
+        throw new Error('Failed to calculate user balance.');
+    }
+});
+
+
+conver NGN TO USD IN ADMIN SETTINGS
+// // Static method to create or update admin settings fields including currency conversion
+// AdminSettingsSchema.statics.createOrUpdateField = async function (field, value) {
+//     try {
+//         // Find the admin settings document
+//         let adminSettings = await this.findOne();
+
+//         // If document does not exist, create a new one
+//         if (!adminSettings) {
+//             adminSettings = new this();
+//         }
+
+//         // Update the field value
+//         adminSettings[field] = value;
+
+//         // Convert USD to NGN if necessary
+//         if ((field === 'amountPerVotePoint' || field === 'minDepositAmount') && adminSettings.currency === 'USD') {
+//             const convertedValue = await convertUSDToNGN(value);
+//             adminSettings[field] = convertedValue;
+//         }
+
+//         // Save the document
+//         await adminSettings.save();
+
+//         console.log(`Admin settings field "${field}" updated successfully`);
+//     } catch (error) {
+//         console.error('Error creating or updating admin settings field:', error.message);
+//         throw error;
+//     }
+// };
+
+// // Function to convert USD to NGN
+// async function convertUSDToNGN(amountInUSD) {
+//     try {
+//         // Make API call to fetch latest exchange rates
+//         const response = await axios.get('https://open.er-api.com/v6/latest/USD');
+
+//         // Check if request was successful
+//         if (response.status === 200) {
+//             // Extract exchange rate for USD to NGN
+//             const usdToNgnRate = response.data.rates.NGN;
+
+//             // Convert USD to NGN
+//             const amountInNGN = amountInUSD * usdToNgnRate;
+
+//             return amountInNGN;
+//         } else {
+//             throw new Error('Failed to fetch exchange rates');
+//         }
+//     } catch (error) {
+//         console.error('Error converting USD to NGN:', error.message);
+//         throw error;
+//     }
+// }

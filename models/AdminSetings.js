@@ -6,11 +6,7 @@ const AdminSettingsSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
-    notificationSound: {
-        type: Boolean,
-        default: true,
-    },
-    
+       
     minDepositAmount: {
         type: Number,
         unique: true,
@@ -25,9 +21,55 @@ const AdminSettingsSchema = new mongoose.Schema({
         default: 'NGN',
         unique: true,
     },
+    allowVoteWithBalance: {
+        type: Boolean,
+        default: true,
+    },
+
+    allowVoteWithVotePoints: {
+        type: Boolean,
+        default: true,
+    },
+    allowVoteWithVotereferralPoints: {
+        type: Boolean,
+        default: true,
+    },
+
+    allowFreeMultipleVote: {
+        type: Boolean,
+        default: false,
+    },
+
+    numberOfFreeVotes: {
+        type: Number,
+        default: 1,
+    },
+
+    setReferralPoints: {
+        type: Number,
+        unique: true,
+        default: 5,
+    },
+
+    setReferralCredit: {
+        type: Number,
+        unique: true,
+        default: 50,
+    },
+
+    
+
+    referralBonus: {
+        type: String,
+        enum: ['referralPoints', 'ReferralCredit'],
+        default: 'referralPoints',
+        
+    },
+
+
 });
 
-// Static method to create or update admin settings fields including currency conversion
+//  Static method to create or update admin settings fields including currency conversion
 AdminSettingsSchema.statics.createOrUpdateField = async function (field, value) {
     try {
         // Find the admin settings document
@@ -57,29 +99,7 @@ AdminSettingsSchema.statics.createOrUpdateField = async function (field, value) 
     }
 };
 
-// Function to convert USD to NGN
-async function convertUSDToNGN(amountInUSD) {
-    try {
-        // Make API call to fetch latest exchange rates
-        const response = await axios.get('https://open.er-api.com/v6/latest/USD');
 
-        // Check if request was successful
-        if (response.status === 200) {
-            // Extract exchange rate for USD to NGN
-            const usdToNgnRate = response.data.rates.NGN;
-
-            // Convert USD to NGN
-            const amountInNGN = amountInUSD * usdToNgnRate;
-
-            return amountInNGN;
-        } else {
-            throw new Error('Failed to fetch exchange rates');
-        }
-    } catch (error) {
-        console.error('Error converting USD to NGN:', error.message);
-        throw error;
-    }
-}
 
 const AdminSettings = mongoose.model('AdminSettings', AdminSettingsSchema);
 

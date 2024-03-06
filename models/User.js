@@ -74,11 +74,11 @@ const UserSchema = new mongoose.Schema({
     //   type: Number,
     //   default: 0,
     // },
-    // currency: {
-    //   type: String,
-    //   enums: ['USD', 'NGD'],
-    //   default: 'NGN',
-    // },
+    currency: {
+      type: String,
+      enums: ['USD', 'NGD'],
+      default: 'NGN',
+    },
     votePoints: {
       type: Number,
       default: 0,
@@ -321,28 +321,30 @@ const UserSchema = new mongoose.Schema({
   });
 
 
-  UserSchema.virtual('wallet.balance').get(async function() {
-    try {
-        // Fetch all completed incoming transactions (deposits, payments received)
-        const incomingTransactions = await Transaction.find({ user: this._id, type: 'income', status: 'completed' });
+  UserSchema.virtual('wallet.balance').get(function() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Fetch all completed incoming transactions (deposits, payments received)
+            const incomingTransactions = await Transaction.find({ user: this._id, type: 'income', status: 'completed' });
 
-        // Fetch all completed outgoing transactions (withdrawals, payments made)
-        const outgoingTransactions = await Transaction.find({ user: this._id, type: 'expense', status: 'completed' });
+            // Fetch all completed outgoing transactions (withdrawals, payments made)
+            const outgoingTransactions = await Transaction.find({ user: this._id, type: 'expense', status: 'completed' });
 
-        // Calculate total incoming amount
-        const totalIncomingAmount = incomingTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
+            // Calculate total incoming amount
+            const totalIncomingAmount = incomingTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
 
-        // Calculate total outgoing amount
-        const totalOutgoingAmount = outgoingTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
+            // Calculate total outgoing amount
+            const totalOutgoingAmount = outgoingTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
 
-        // Calculate balance by subtracting total outgoing from total incoming
-        const balance = totalIncomingAmount - totalOutgoingAmount;
+            // Calculate balance by subtracting total outgoing from total incoming
+            const balance = totalIncomingAmount - totalOutgoingAmount;
 
-        return balance;
-    } catch (error) {
-        console.error('Error calculating user balance:', error);
-        throw new Error('Failed to calculate user balance.');
-    }
+            resolve(balance);
+        } catch (error) {
+            console.error('Error calculating user balance:', error);
+            reject(new Error('Failed to calculate user balance.'));
+        }
+    });
 });
 
 

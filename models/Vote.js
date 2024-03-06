@@ -14,35 +14,31 @@ const VoteSchema = new mongoose.Schema({
         ref: 'Season',
         required: true
     },
-    comments: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Comment' 
-    }],
-
-    reactions: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Reaction' 
-    }], 
     houseMates: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Housemate',
-        required: true
+        ref: 'User', 
+        // required: true
     }],
     startTime: {
         type: Date,
-        required: true
+        required: true,
+        default: Date.now() 
     },
     endTime: {
         type: Date,
-        required: true
+      
     },
     allowComment: {
         type: Boolean,
-        default: true
+        default: true 
     },
-    allowReaction: {
+    closeVote: {
         type: Boolean,
-        default: true
+        default: false 
+    },
+    free: {
+        type: Boolean,
+        default: false 
     },
     votes: [{
         voter: {
@@ -52,17 +48,15 @@ const VoteSchema = new mongoose.Schema({
         },
         housemate: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Housemate',
-            required: true
+            ref: 'User',
+            // required: true
         },
-        numVotes: {
+
+        // number of votes particular User is giving
+        numberOfVotes: {
             type: Number,
-            required: true,
-            min: 1  // Ensure at least one vote is cast
-        },
-        optionIndex: {
-            type: Number,
-            required: true
+            // required: true,
+            min: 1  
         }
     }]
 });
