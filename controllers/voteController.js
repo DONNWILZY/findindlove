@@ -4,6 +4,8 @@ const userCache = new NodeCache();
 const Vote = require('../models/Vote');
 const AdminSettings = require('../models/AdminSetings');
 const User = require('../models/User');
+const Housemate = require('../models/User'); 
+
 
 
 // Function to create a new vote
@@ -236,7 +238,7 @@ const voteForHousemates = async (userId, voteId, votes) => {
               source = 'balance';
               // Calculate the deduction amount based on the amountPerVotePoint
               const deductionAmount = numberOfVotes * adminSettings.amountPerVotePoint;
-              console.log(`${deductionAmount} ${numberOfVotes} ${adminSettings.amountPerVotePoint}`);
+              // console.log(`${deductionAmount} ${numberOfVotes} ${adminSettings.amountPerVotePoint}`);
 
               // Check if the user has enough balance
               if (user.wallet.balance < deductionAmount) {
@@ -322,6 +324,180 @@ const voteForHousemates = async (userId, voteId, votes) => {
 }
 
 
+const voteResult = async (housemateId) => {
+  try {
+    // Find the housemate
+    const housemate = await Housemate.findById(housemateId);
+
+    // Check if housemate exists
+    if (!housemate) {
+      console.error('Housemate not found.');
+      return null; // Return null to indicate failure
+    }
+
+    // Find all votes
+    const votes = await Vote.find();
+
+    // Process the votes to aggregate the total votes for the housemate
+    let totalVotes = 0;
+    for (const vote of votes) {
+      // Check if the housemate exists in the current vote
+      const housemateVote = vote.houseMates.find(hm => hm.housemateId.toString() === housemateId);
+      if (housemateVote) {
+        totalVotes += housemateVote.totalVotes;
+      }
+    }
+
+    // Construct the result object
+    const voteResults = {
+      housemate: {
+        id: housemate._id,
+        name: housemate.name,
+        // Add more details about the housemate if needed
+      },
+      totalVotes: totalVotes
+    };
+
+    return voteResults;
+  } catch (error) {
+    console.error('Error fetching votes and results:', error);
+    return null; // Return null to indicate failure
+  }
+};
+
+
+const calculateTotalVotesForHousemates = async () => {
+  try {
+    const totalVotesAggregate = await Vote.aggregate([
+      // Unwind the votes array to get each vote separately
+      { $unwind: "$votes" },
+      // Group by housemate and sum up their total votes
+      {
+        $group: {
+          _id: "$votes.housemate",
+          totalVotes: { $sum: "$votes.numberOfVotes" }
+        }
+      },
+      // Project to reshape the output document
+      {
+        $project: {
+          _id: 0, // Exclude the default _id field
+          housemate: "$_id",
+          totalVotes: 1
+        }
+      }
+    ]);
+    
+    return totalVotesAggregate;
+  } catch (error) {
+    console.error('Error calculating total votes for housemates:', error);
+    return null;
+  }
+};
+
+
+const getVotesForSession = async (voteId) => {
+  try {
+    const vote = await Vote.findById(voteId)
+      .populate({
+        path: 'votes',
+        populate: {
+          path: 'voter housemate',
+          select: 'username displayPhoto',
+          model: 'User'
+        }
+      })
+      .select('title description votes');
+
+    if (!vote) {
+      return null;
+    }
+
+    const housemateVotes = {};
+    vote.votes.forEach(voteEntry => {
+      const housemateId = voteEntry.housemate._id.toString();
+      housemateVotes[housemateId] = (housemateVotes[housemateId] || 0) + voteEntry.numberOfVotes;
+    });
+
+    return { vote, housemateVotes };
+  } catch (error) {
+    console.error('Error fetching votes for session:', error);
+    return null;
+  }
+};
+
+
+
+const getTotalVotesPerUser = async (voteId) => {
+  try {
+    const vote = await Vote.findById(voteId).populate({
+      path: 'votes',
+      populate: {
+        path: 'voter',
+        select: 'username displayPhoto',
+        model: 'User'
+      }
+    });
+
+    if (!vote) {
+      return null;
+    }
+
+    const userVotes = {};
+    vote.votes.forEach(voteEntry => {
+      const userId = voteEntry.voter._id.toString();
+      userVotes[userId] = (userVotes[userId] || 0) + voteEntry.numberOfVotes;
+    });
+
+    const userVoteDetails = [];
+    for (const userId in userVotes) {
+      const userDetails = await User.findById(userId).select('username displayPhoto');
+      if (userDetails) {
+        userVoteDetails.push({ user: userDetails, totalVotes: userVotes[userId] });
+      }
+    }
+
+    return userVoteDetails;
+  } catch (error) {
+    console.error('Error fetching total votes per user:', error);
+    return null;
+  }
+};
+
+
+// Function to calculate total votes for each housemate in a session
+const getTotalVotesPerHousemate = async (voteId) => {
+  try {
+    const vote = await Vote.findById(voteId).populate({
+      path: 'houseMates',
+      select: 'username displayPhoto',
+      model: 'User'
+    });
+
+    if (!vote) {
+      return null;
+    }
+
+    const housemateVotes = {};
+    vote.houseMates.forEach(housemate => {
+      const totalVotes = vote.votes.reduce((total, voteEntry) => {
+        if (voteEntry.housemate && voteEntry.housemate.toString() === housemate._id.toString()) {
+          return total + voteEntry.numberOfVotes;
+        }
+        return total;
+      }, 0);
+      housemateVotes[housemate.username] = totalVotes;
+    });
+
+    return housemateVotes;
+  } catch (error) {
+    console.error('Error fetching total votes per housemate:', error);
+    return null;
+  }
+};
+
+
+
 
 
 
@@ -331,5 +507,10 @@ module.exports = {
   addHousemateToVote,
   removeHousemateFromVote,
   updatePoll,
-  voteForHousemates
+  voteForHousemates,
+  voteResult,
+  calculateTotalVotesForHousemates,
+  getVotesForSession,
+  getTotalVotesPerUser,
+  getTotalVotesPerHousemate
 };

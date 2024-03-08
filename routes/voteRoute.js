@@ -4,8 +4,18 @@ const express = require('express');
 const router = express.Router();
 const AdminSettings = require('../models/AdminSetings');
 const User = require('../models/User');
+const Housemate = require('../models/User');
 const Vote = require('../models/Vote');
-const { createVote, addHousemateToVote, removeHousemateFromVote, updatePoll, voteForHousemates } = require('../controllers/voteController');
+const { createVote, 
+    addHousemateToVote, 
+    removeHousemateFromVote, 
+    updatePoll, 
+    voteForHousemates, 
+    voteResult, 
+    calculateTotalVotesForHousemates, 
+    getVotesForSession, 
+    getTotalVotesPerUser,
+    getTotalVotesPerHousemate} = require('../controllers/voteController');
 
 // Route to create a new vote
 router.post('/create', async (req, res) => {
@@ -86,4 +96,96 @@ router.post('/vote', async (req, res) => {
 });
 
 
+
+
+// Route to get vote results for a specific housemate
+router.get('/result/:housemateId', async (req, res) => {
+    try {
+      const { housemateId } = req.params;
+      const voteResults = await voteResult(housemateId);
+      
+      if (!voteResults) {
+        return res.status(404).json({ success: false, message: 'Housemate not found or error fetching votes.' });
+      }
+  
+      res.json({ success: true, data: voteResults });
+    } catch (error) {
+      console.error('Error fetching votes and results:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+  });
+
+
+
+  router.get('/totalvotes', async (req, res) => {
+    try {
+      // Call the function to calculate total votes for housemates
+      const totalVotes = await calculateTotalVotesForHousemates();
+  
+      // Check if total votes were successfully calculated
+      if (!totalVotes) {
+        return res.status(500).json({ success: false, message: 'Error calculating total votes for housemates.' });
+      }
+  
+      // Return the total votes for housemates
+      res.json({ success: true, data: totalVotes });
+    } catch (error) {
+      console.error('Error calculating total votes for housemates:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+  });
+
+  // Route to fetch votes for a particular session
+router.get('/votes/:voteId', async (req, res) => {
+    try {
+      const { voteId } = req.params;
+      const voteData = await getVotesForSession(voteId);
+  
+      if (!voteData) {
+        return res.status(404).json({ success: false, message: 'Vote session not found.' });
+      }
+  
+      res.json({ success: true, data: voteData });
+    } catch (error) {
+      console.error('Error fetching votes for session:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+  });
+
+
+  router.get('/votes/total/:voteId', async (req, res) => {
+    try {
+      const { voteId } = req.params;
+      const userVoteDetails = await getTotalVotesPerUser(voteId);
+  
+      if (!userVoteDetails) {
+        return res.status(404).json({ success: false, message: 'Vote session not found.' });
+      }
+  
+      res.json({ success: true, data: userVoteDetails });
+    } catch (error) {
+      console.error('Error fetching total votes per user:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+  });
+
+
+  // Route to fetch total votes per housemate in a session
+  router.get('/housemate/:voteId', async (req, res) => {
+    try {
+      const { voteId } = req.params;
+      const housemateVotes = await getTotalVotesPerHousemate(voteId);
+  
+      if (!housemateVotes) {
+        return res.status(404).json({ success: false, message: 'Vote session not found.' });
+      }
+  
+      res.json({ success: true, data: housemateVotes });
+    } catch (error) {
+      console.error('Error fetching total votes per housemate:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+  });
+
+  
 module.exports = router;
