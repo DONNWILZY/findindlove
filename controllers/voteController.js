@@ -478,6 +478,10 @@ const getTotalVotesPerHousemate = async (voteId) => {
       return null;
     }
 
+    const totalVotesForAllHousemates = vote.votes.reduce((total, voteEntry) => {
+      return total + voteEntry.numberOfVotes;
+    }, 0);
+
     const housemateVotes = [];
     vote.houseMates.forEach(housemate => {
       const totalVotes = vote.votes.reduce((total, voteEntry) => {
@@ -486,6 +490,8 @@ const getTotalVotesPerHousemate = async (voteId) => {
         }
         return total;
       }, 0);
+      
+      const percentage = (totalVotes / totalVotesForAllHousemates) * 100;
 
       housemateVotes.push({
         userId: housemate._id,
@@ -493,7 +499,8 @@ const getTotalVotesPerHousemate = async (voteId) => {
         username: housemate.username,
         gender: housemate.gender,
         image: housemate.displayPhoto,
-        numberOfVotes: totalVotes
+        numberOfVotes: totalVotes,
+        percentage: percentage.toFixed(2) + '%'
       });
     });
 
@@ -504,8 +511,10 @@ const getTotalVotesPerHousemate = async (voteId) => {
   }
 };
 
-// controllers/voteController.js
 
+
+
+/// GET RESULT for  Single House Mate
 const getHousemateResult = async (voteId, housemateId) => {
   try {
     const vote = await Vote.findById(voteId).populate({
@@ -526,16 +535,22 @@ const getHousemateResult = async (voteId, housemateId) => {
       return null;
     }
 
-    const totalVotes = housemateVotes.reduce((total, vote) => total + vote.numberOfVotes, 0);
+    const totalVotes = vote.votes.reduce((total, vote) => total + vote.numberOfVotes, 0);
+
+    const housemateTotalVotes = housemateVotes.reduce((total, vote) => total + vote.numberOfVotes, 0);
+
+    // Calculate percentage
+    const percentage = (housemateTotalVotes / totalVotes) * 100;
 
     return {
       userId: housemateVotes[0].voter._id,
       username: housemateVotes[0].voter.username,
       image: housemateVotes[0].voter.displayPhoto,
-      totalVotes: totalVotes
+      totalVotes: housemateTotalVotes,
+      percent: percentage.toFixed(2) + '%' // Round to 2 decimal places
     };
   } catch (error) {
-    console.error('Error fetching housemate result:', error);
+    console.error('Error fetching housemate result with percentage:', error);
     return null;
   }
 };
