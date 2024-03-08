@@ -15,7 +15,8 @@ const { createVote,
     calculateTotalVotesForHousemates, 
     getVotesForSession, 
     getTotalVotesPerUser,
-    getTotalVotesPerHousemate} = require('../controllers/voteController');
+    getTotalVotesPerHousemate,
+    getHousemateResult} = require('../controllers/voteController');
 
 // Route to create a new vote
 router.post('/create', async (req, res) => {
@@ -187,5 +188,20 @@ router.get('/votes/:voteId', async (req, res) => {
     }
   });
 
+  router.get('/result/:voteId/:housemateId', async (req, res) => {
+    try {
+      const { voteId, housemateId } = req.params;
+      const housemateResult = await getHousemateResult(voteId, housemateId);
   
+      if (!housemateResult) {
+        return res.status(404).json({ success: false, message: 'Housemate not found or error fetching votes.' });
+      }
+  
+      res.json({ success: true, data: housemateResult });
+    } catch (error) {
+      console.error('Error fetching housemate result:', error);
+      res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+  });
+
 module.exports = router;

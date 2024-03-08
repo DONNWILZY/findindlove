@@ -470,7 +470,7 @@ const getTotalVotesPerHousemate = async (voteId) => {
   try {
     const vote = await Vote.findById(voteId).populate({
       path: 'houseMates',
-      select: 'username displayPhoto',
+      select: 'username displayPhoto firstName lastName gender',
       model: 'User'
     });
 
@@ -478,7 +478,7 @@ const getTotalVotesPerHousemate = async (voteId) => {
       return null;
     }
 
-    const housemateVotes = {};
+    const housemateVotes = [];
     vote.houseMates.forEach(housemate => {
       const totalVotes = vote.votes.reduce((total, voteEntry) => {
         if (voteEntry.housemate && voteEntry.housemate.toString() === housemate._id.toString()) {
@@ -486,7 +486,15 @@ const getTotalVotesPerHousemate = async (voteId) => {
         }
         return total;
       }, 0);
-      housemateVotes[housemate.username] = totalVotes;
+
+      housemateVotes.push({
+        userId: housemate._id,
+        name: `${housemate.firstName} ${housemate.lastName}`,
+        username: housemate.username,
+        gender: housemate.gender,
+        image: housemate.displayPhoto,
+        numberOfVotes: totalVotes
+      });
     });
 
     return housemateVotes;
@@ -495,6 +503,44 @@ const getTotalVotesPerHousemate = async (voteId) => {
     return null;
   }
 };
+
+// controllers/voteController.js
+
+const getHousemateResult = async (voteId, housemateId) => {
+  try {
+    const vote = await Vote.findById(voteId).populate({
+      path: 'votes',
+      populate: {
+        path: 'voter',
+        select: 'username displayPhoto',
+        model: 'User'
+      }
+    });
+
+    if (!vote) {
+      return null;
+    }
+
+    const housemateVotes = vote.votes.filter(vote => vote.housemate.toString() === housemateId);
+    if (housemateVotes.length === 0) {
+      return null;
+    }
+
+    const totalVotes = housemateVotes.reduce((total, vote) => total + vote.numberOfVotes, 0);
+
+    return {
+      userId: housemateVotes[0].voter._id,
+      username: housemateVotes[0].voter.username,
+      image: housemateVotes[0].voter.displayPhoto,
+      totalVotes: totalVotes
+    };
+  } catch (error) {
+    console.error('Error fetching housemate result:', error);
+    return null;
+  }
+};
+
+
 
 
 
@@ -512,5 +558,6 @@ module.exports = {
   calculateTotalVotesForHousemates,
   getVotesForSession,
   getTotalVotesPerUser,
-  getTotalVotesPerHousemate
+  getTotalVotesPerHousemate,
+  getHousemateResult
 };

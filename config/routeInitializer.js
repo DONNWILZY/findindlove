@@ -29,6 +29,8 @@ function initializeRoutes(app) {
   // Use permissionRoute
   app.use('/api/permission', permissionRoute);
   //use form route
+  app.use('/api/form', formRoute);
+  //use blog route
   app.use('/api/blog', blogRoute);
   // settimgs route
   app.use('/api/settings', settingsRoute);
@@ -44,3 +46,5 @@ function initializeRoutes(app) {
 }
 
 module.exports = initializeRoutes;
+
+
