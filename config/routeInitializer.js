@@ -19,6 +19,8 @@ const paymentRoute = require('../routes/paymentRoute');
 const userRoute = require('../routes/userRoute');
 //poll Route
 const pollRoute = require('../routes/voteRoute');
+// upload
+const uploadRoute = require('../routes/uploadRoute');
 
 function initializeRoutes(app) {
 
@@ -40,6 +42,8 @@ function initializeRoutes(app) {
   app.use('/api/user', userRoute);
   // user route
   app.use('/api/poll', pollRoute);
+    // upload route
+    app.use('/api/uplaod', uploadRoute);
 
 
 
