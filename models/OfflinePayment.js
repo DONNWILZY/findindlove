@@ -22,7 +22,7 @@ const OfflinePaymentSchema = new mongoose.Schema({
     
       proofImage: {
         type: String,
-        required: true,
+        // required: true,
       },
       textProof: {
         type: String,

@@ -14,6 +14,9 @@ const generateShortId = require('../Utilities/generateShortId');
 //currency Conveter
 const convertToNGN = require('../Utilities/currencyConverter');
 
+const { cloudinary } = require('../config/cloudinary');
+const upload = require('../middlewares/multer');
+
 
 
 
@@ -109,7 +112,7 @@ const offline = async (req, res) => {
                 description: 'Offline Payment',
                 status: 'completed' 
             });
-            transactionId = transaction._id;
+            transactionId = generateShortId();
         } else {
             // Create a transaction record for the offline payment
             const transaction = await Transaction.create({

@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const {submitProof} = require('../services/offline');
 const {offline, getAllTransactions, getTransaction, getSingleTransaction, getAllTransactionsForUser, purchaseVotePoints} = require('../controllers/paymentController');
+const { cloudinary } = require('../config/cloudinary');
+const upload = require('../middlewares/multer');
+
 
 // Route to submit offline payment proof
-router.post('/offline', offline);
+router.post('/offlines', offline);
 
+router.post('/offline', upload.single('proofImage'), submitProof);
 //get ll transactions
 router.get('/transactions', getAllTransactions);
 

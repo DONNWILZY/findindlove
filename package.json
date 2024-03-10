@@ -32,6 +32,7 @@
     "node-cache": "^5.1.2",
     "nodemailer": "^6.9.9",
     "nodemon": "^3.0.3",
+    "path": "^0.12.7",
     "paypal": "^1.0.1",
     "paystack": "^2.0.1",
     "shortid": "^2.2.16",
