@@ -7,9 +7,10 @@ const upload = require('../middlewares/multer');
 
 
 // Route to submit offline payment proof
-router.post('/offlines', offline);
+router.post('/offlines',upload.single('proofImage'), offline);
 
-router.post('/offline', upload.single('proofImage'), submitProof);
+router.post('/submitProof', upload.single('proofImage'), submitProof);
+
 //get ll transactions
 router.get('/transactions', getAllTransactions);
 

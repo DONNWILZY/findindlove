@@ -91,10 +91,22 @@ const initiatePayment = async (req, res) => {
 
 const offline = async (req, res) => {
     try {
-        const { userId, amount, proofImage, textProof, currency } = req.body;
-        
+        // Check if proofImage is included in the request file
+        if (!req.file) {
+            return res.status(400).json({ error: 'Proof image is required.' });
+        }
+
+        const { userId, amount, textProof, currency } = req.body;
+        const proofImage = req.file; // Access the uploaded file data
+
+        let proofImageUrl;
+
+        // Upload the image to Cloudinary
+        const uploadedImage = await cloudinary.uploader.upload(proofImage.path);
+        proofImageUrl = uploadedImage.secure_url;
+
         // Submit the offline payment proof
-        const offlinePayment = await OfflinePaymentService.submitProof(userId, amount, proofImage, textProof, currency);
+        const offlinePayment = await OfflinePaymentService.submitProof(userId, amount, proofImageUrl, textProof, currency);
         
         let transactionId;
 
@@ -135,6 +147,7 @@ const offline = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
 
 
 const getAllTransactions = async (req, res) => {
