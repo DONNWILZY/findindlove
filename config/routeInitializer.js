@@ -43,7 +43,7 @@ function initializeRoutes(app) {
   // user route
   app.use('/api/poll', pollRoute);
     // upload route
-    app.use('/api/uplaod', uploadRoute);
+    app.use('/api/upload', uploadRoute);
 
 
 
