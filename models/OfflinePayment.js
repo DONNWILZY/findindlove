@@ -39,12 +39,10 @@ const OfflinePaymentSchema = new mongoose.Schema({
         type: Date
     },
 
-    
-
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+     
+},
+{
+  timestamps: true
 });
 
 const OfflinePayment = mongoose.model('OfflinePayment', OfflinePaymentSchema);

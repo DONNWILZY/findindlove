@@ -122,7 +122,7 @@ const offline = async (req, res) => {
                 offline: offlinePayment._id, // Use the ID of the offline payment as the transaction ID
                 type: 'income', 
                 description: 'Offline Payment',
-                status: 'completed' 
+                status: 'pending' 
             });
             transactionId = generateShortId();
         } else {
@@ -135,7 +135,7 @@ const offline = async (req, res) => {
                 currency,
                 type: 'income', 
                 description: 'Offline Payment',
-                status: 'completed' 
+                status: 'pending' 
             });
             transactionId = transaction._id;
         }

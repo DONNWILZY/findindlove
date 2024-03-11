@@ -35,6 +35,10 @@ const TransactionSchema = new mongoose.Schema({
         ref: 'OfflinePayment',
     },
 
+    feedback: {
+        type: String
+    },
+
 }, {
     timestamps: true 
 });

@@ -57,6 +57,12 @@ const AdminSettingsSchema = new mongoose.Schema({
         default: 50,
     },
 
+    storage: {
+       type: String,
+       enum: ['aws', 'firebase', 'cloudinary', 'gcp'],
+       default: 'cloudinary'
+    },
+
     
 
     referralBonus: {
