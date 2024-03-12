@@ -63,7 +63,10 @@ const AdminSettingsSchema = new mongoose.Schema({
        default: 'cloudinary'
     },
 
-    
+    anonymousCharacter: {
+        type: Number,
+        default: 0
+    },
 
     referralBonus: {
         type: String,
