@@ -13,7 +13,6 @@ const User = require('../models/User');
 const generateShortId = require('../Utilities/generateShortId');
 //currency Conveter
 const convertToNGN = require('../Utilities/currencyConverter');
-
 const { cloudinary } = require('../config/cloudinary');
 const upload = require('../middlewares/multer');
 

@@ -21,6 +21,8 @@ const userRoute = require('../routes/userRoute');
 const pollRoute = require('../routes/voteRoute');
 // upload
 const uploadRoute = require('../routes/uploadRoute');
+//anonymouse route
+const anonymousRoute  = require('../routes/anonMsgRoute');
 
 function initializeRoutes(app) {
 
@@ -43,7 +45,9 @@ function initializeRoutes(app) {
   // user route
   app.use('/api/poll', pollRoute);
     // upload route
-    app.use('/api/upload', uploadRoute);
+  app.use('/api/upload', uploadRoute);
+      // anymouse messaage Route route
+  app.use('/api/anonymous', anonymousRoute);
 
 
 
