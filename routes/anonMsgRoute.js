@@ -3,15 +3,25 @@ const router = express.Router();
 const { cloudinary } = require('../config/cloudinary');
 const upload = require('../middlewares/multer');
 const { sendAnonymousMessage, sendThreadMessage, getMessageWithThreads, getMessageWithThreadsForUser, getAllMessagesForUser  } = require('../controllers/anonymousMessageController'); 
+const {verifyToken, 
+    verifyUser, 
+    verifyAdmin, 
+    verifyStaff, 
+    verifySuperAdmin, 
+    checkPermission} = require('../middlewares/authMiddleware');
+
+
+
 
 // Route for sending anonymous messages
 router.post('/send', upload.single('image'), sendAnonymousMessage);
+// add thread to message
 router.post('/thread', upload.single('image'), sendThreadMessage);
 // Route for getting a single message with threads
-router.get('/message/:messageId', getMessageWithThreads);
+router.get('/message/:messageId', verifyToken, verifyUser || checkPermission('get_anony'),  getMessageWithThreads);
 
 // Route to get a single message with threads for a user
-router.get('/messages/:messageId/:userId', async (req, res) => {
+router.get('/messages/:messageId/:userId', verifyToken, verifyUser || checkPermission('get_anony'),   async (req, res) => {
     try {
         const userId = req.params.userId;
         const messageId = req.params.messageId;
@@ -35,7 +45,7 @@ router.get('/messages/:messageId/:userId', async (req, res) => {
 
 
 // Route for getting all messages for a user
-router.get('/messages/:userId', async (req, res) => {
+router.get('/messages/:userId', verifyToken, verifyUser || checkPermission('get_anony'),  async (req, res) => {
     try {
         const userId = req.params.userId;
 
