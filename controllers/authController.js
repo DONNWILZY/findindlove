@@ -133,7 +133,7 @@ const login = async (req, res) => {
   try {
       // Find user by username, email, or phone number
       const user = await User.findOne({
-          $or: [{ username }, { email }, { phoneNumber }]
+          $or: [{ username }, { email }]
       });
 
       if (!user) {
@@ -200,7 +200,8 @@ const login = async (req, res) => {
               AppId: user.systemNumber,
               authToken,
               accountStatus: user.accountStatus.action,
-              role: user.role
+              role: user.role,
+              id: user._id
 
           }
       });

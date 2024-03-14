@@ -18,7 +18,7 @@ router.post('/send', upload.single('image'), sendAnonymousMessage);
 // add thread to message
 router.post('/thread', upload.single('image'), sendThreadMessage);
 // Route for getting a single message with threads
-router.get('/message/:messageId', verifyToken, verifyUser || checkPermission('get_anony'),  getMessageWithThreads);
+router.get('/message/:messageId', verifyToken, checkPermission('get_anony'),  getMessageWithThreads);
 
 // Route to get a single message with threads for a user
 router.get('/messages/:messageId/:userId', verifyToken, verifyUser || checkPermission('get_anony'),   async (req, res) => {
