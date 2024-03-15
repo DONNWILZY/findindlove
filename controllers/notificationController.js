@@ -1,6 +1,8 @@
 // notificationMiddleware.js
 
 const Notification = require('./models/Notification');
+const NotificationService = require('../services/notificationService');
+
 
 async function sendNotification(userId, recipientType, message) {
     // Create a new notification

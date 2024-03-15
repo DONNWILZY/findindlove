@@ -7,6 +7,7 @@ const HouseMate = require('../models/User');
 const Post = require('../models/Post');
 const Season = require('../models/Season');
 const Notification = require('../models/Notification');
+const NotificationService = require('../services/notificationService');
 
 
 

@@ -9,12 +9,16 @@ const Transaction = require('../models/Transaction');
 const OfflinePayment = require('../models/OfflinePayment');
 const AdminSettings = require('../models/AdminSetings');
 const User = require('../models/User');
+
 /// functon ot generate shortId
 const generateShortId = require('../Utilities/generateShortId');
 //currency Conveter
 const convertToNGN = require('../Utilities/currencyConverter');
 const { cloudinary } = require('../config/cloudinary');
 const upload = require('../middlewares/multer');
+const NotificationService = require('../services/notificationService');
+const Notification = require('../models/Notification');
+// const { ObjectId } = require('mongoose').Types;
 
 
 
@@ -138,6 +142,34 @@ const offline = async (req, res) => {
             });
             transactionId = transaction._id;
         }
+
+        // Fetch user data
+        const user = await User.findById(userId);
+
+        // Notify the user
+        const userNotification = await Notification.create({
+            user: userId,
+            message: `Your payment has been successfully submitted.`,
+            recipientType: 'user', // Notify the user
+            activityType: 'payment',
+            activityId: offlinePayment._id,
+            isRead: false, // Notification is not read yet
+        });
+
+        // Notify each super admin
+        // Fetch super admin users
+        const superAdmins = await User.find({ role: 'superAdmin' });
+
+        for (const superAdmin of superAdmins) {
+            await Notification.create({
+                user: superAdmin._id, // Notify the super admin user
+                message: `A payment of ${amount} ${currency} has been made successfully by @${user.username}`, // Include the username in the message
+                recipientType: 'admin', // Notify admin or super admin
+                activityType: 'payment',
+                activityId: offlinePayment._id,
+                isRead: false, // Notification is not read yet
+            });
+        }
         
         // Respond with the details of the offline payment and the created transaction
         return res.status(200).json({ offlinePayment, transactionId });
@@ -146,6 +178,7 @@ const offline = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
 
 
 

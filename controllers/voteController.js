@@ -5,6 +5,7 @@ const Vote = require('../models/Vote');
 const AdminSettings = require('../models/AdminSetings');
 const User = require('../models/User');
 const Housemate = require('../models/User'); 
+const NotificationService = require('../services/notificationService');
 
 
 

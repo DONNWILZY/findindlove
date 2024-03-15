@@ -150,12 +150,30 @@ const UserSchema = new mongoose.Schema({
       default: 'online',
     },
 
+    isBlocked:{
+      type: Boolean,
+      default: true
+    },
+
     duration: {
-      type: String,
+      type: Number,
+      default: 32
+
     },
     durationType: {
       type: String,
-      enum: ['hours', 'days', 'months', 'year']
+      enum: ['hours', 'days', 'months', 'year'],
+      default: 'days'
+    },
+
+    startTime:{
+      type: Date,
+      default: Date.now
+    },
+    
+    endTime:{
+      type: Date,
+     
     }
   },
 

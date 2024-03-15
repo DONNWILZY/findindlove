@@ -6,6 +6,7 @@ const User = require("../models/User");
 const OtpCode = require("../models/OtpCode");
 const transporter = require("../Utilities/transporter");
 const Notification = require("../models/Notification");
+const NotificationService = require('../services/notificationService');
 
 
 //////////////// SIGNUP HERE HERE /////////////////////////
@@ -152,10 +153,14 @@ const login = async (req, res) => {
       }
 
       // Check if the user's account is blocked
-      if (user.accountStatus.action === "blocked") {
+      if (user.accountStatus.isBlocked === true) {
           // Check if it's time to retry login
           const duration = parseInt(user.accountStatus.duration);
           const durationType = user.accountStatus.durationType;
+
+          const check = user.accountStatus.isBlocked
+
+          console.log(check, duration,  )
 
           if (duration > 0) {
               return res.status(403).json({
@@ -200,6 +205,7 @@ const login = async (req, res) => {
               AppId: user.systemNumber,
               authToken,
               accountStatus: user.accountStatus.action,
+              blockedStatus: user.accountStatus.isBlocked,
               role: user.role,
               id: user._id
 

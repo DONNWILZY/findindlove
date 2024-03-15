@@ -1,4 +1,5 @@
 const User = require ('../models/User');
+const NotificationService = require('../services/notificationService');
 
 const getWalletBalance = async (userId) => {
     try {
