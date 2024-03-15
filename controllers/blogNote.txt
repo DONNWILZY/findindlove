@@ -708,3 +708,59 @@ const submitProof = async (req, res) => {
       res.status(500).json({ error: 'Internal server error.' });
     }
   };
+
+
+
+  // Notify superAdmins and staff/admins with specific permission
+const usersToNotify = await User.find({
+    $or: [
+        { role: 'superAdmin' },
+        { $and: [{ $or: [{ role: 'staff' }, { role: 'admin' }] }, { permissions: 'specificPermission' }] }
+    ]
+});
+
+for (const user of usersToNotify) {
+    await Notification.create({
+        user: user._id,
+        message: `A payment of ${amount} ${currency} has been made successfully by @${user.username}`,
+        recipientType: 'admin', // Notify admin or super admin
+        activityType: 'payment',
+        activityId: offlinePayment._id,
+        isRead: false, // Notification is not read yet
+    });
+}
+
+
+
+// Notify superAdmins without checking for permission
+const superAdmins = await User.find({ role: 'superAdmin' });
+
+for (const superAdmin of superAdmins) {
+    await Notification.create({
+        user: superAdmin._id,
+        message: `A payment of ${amount} ${currency} has been made successfully by @${user.username}`,
+        recipientType: 'admin', // Notify admin or super admin
+        activityType: 'payment',
+        activityId: offlinePayment._id,
+        isRead: false, // Notification is not read yet
+    });
+}
+
+// Notify staff and admin with specific permission
+const staffAndAdminsWithPermission = await User.find({
+    $or: [{ role: 'staff' }, { role: 'admin' }],
+    permissions: 'specificPermission'
+});
+
+for (const userWithPermission of staffAndAdminsWithPermission) {
+    await Notification.create({
+        user: userWithPermission._id,
+        message: `A payment of ${amount} ${currency} has been made successfully by @${user.username}`,
+        recipientType: 'admin', // Notify admin or super admin
+        activityType: 'payment',
+        activityId: offlinePayment._id,
+        isRead: false, // Notification is not read yet
+    });
+}
+
+

@@ -156,10 +156,10 @@ const offline = async (req, res) => {
             isRead: false, // Notification is not read yet
         });
 
-        // Notify each super admin
+       
         // Fetch super admin users
         const superAdmins = await User.find({ role: 'superAdmin' });
-
+             // Notify each super admin
         for (const superAdmin of superAdmins) {
             await Notification.create({
                 user: superAdmin._id, // Notify the super admin user

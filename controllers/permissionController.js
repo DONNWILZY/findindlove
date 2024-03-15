@@ -70,6 +70,16 @@ const addPermissionsToUser = async (userId, permissionIds) => {
 };
 
 
+const getAllPermissions = async (req, res) => {
+  try {
+      const permissions = await Permission.find();
+      res.json(permissions);
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
+};
+
+
 
 
 
@@ -77,5 +87,6 @@ const addPermissionsToUser = async (userId, permissionIds) => {
 
 module.exports = {
   createPermission,
-  addPermissionsToUser 
+  addPermissionsToUser,
+  getAllPermissions
 };

@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { createPermission, addPermissionsToUser  } = require('../controllers/permissionController');
+const { createPermission, addPermissionsToUser, getAllPermissions  } = require('../controllers/permissionController');
 const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin, checkPermission} = require('../middlewares/authMiddleware');
 
 // create permissions
@@ -28,6 +28,9 @@ router.post('/assign/:userId/', verifyToken, checkPermission('assign_permission'
       return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
+
+/// get all permission
+router.get('/permissions', getAllPermissions);
 
 
 
