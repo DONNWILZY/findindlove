@@ -764,3 +764,17 @@ for (const userWithPermission of staffAndAdminsWithPermission) {
 }
 
 
+// Fetch user data
+const user = await User.findById(userId);
+
+// Notify the user
+const userNotification = await Notification.create({
+    user: userId,
+    message: `Your payment has been successfully submitted.`,
+    recipientType: 'user', // Notify the user
+    activityType: 'payment',
+    activityId: offlinePayment._id,
+    isRead: false, // Notification is not read yet
+});
+
+

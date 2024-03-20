@@ -6,6 +6,7 @@ const { cloudinary } = require('../config/cloudinary');
 const upload = require('../middlewares/multer');
 
 
+
 // Route to submit offline payment proof
 router.post('/offlines',upload.single('proofImage'), offline);
 

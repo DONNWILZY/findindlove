@@ -6,19 +6,25 @@ const StripeService = require('../services/stripe');
 const PayPalService = require('../services/paypal');
 const OfflinePaymentService = require('../services/offline');
 const Transaction = require('../models/Transaction');
+// import offline pyment modul
 const OfflinePayment = require('../models/OfflinePayment');
+// import admin settings model
 const AdminSettings = require('../models/AdminSetings');
+// import user model
 const User = require('../models/User');
-
 /// functon ot generate shortId
 const generateShortId = require('../Utilities/generateShortId');
 //currency Conveter
 const convertToNGN = require('../Utilities/currencyConverter');
+// import cloudinary
 const { cloudinary } = require('../config/cloudinary');
+//import multer
 const upload = require('../middlewares/multer');
+//import notification service
 const NotificationService = require('../services/notificationService');
+// import notification modeel
 const Notification = require('../models/Notification');
-// const { ObjectId } = require('mongoose').Types;
+
 
 
 
