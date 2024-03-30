@@ -1,11 +1,13 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// config/firebase.config.js
+
+// Import Firebase SDK
+const { initializeApp } = require("firebase/app");
+
+// Load environment variables
 const dotenv = require('dotenv');
 dotenv.config();
 
-// Your web app's Firebase configuration
+// Firebase configuration object
 const firebaseConfig = {
   apiKey: process.env.apiKey,
   authDomain: process.env.authDomain,
@@ -15,8 +17,8 @@ const firebaseConfig = {
   appId: process.env.appId
 };
 
-// Initialize Firebase
+// Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 
-
+// Export the Firebase configuration object
 module.exports = { firebaseConfig };

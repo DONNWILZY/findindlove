@@ -3,6 +3,7 @@ const router = express.Router();
 const { registerUser,
     login,
     logout,
+    googleAuth,
 } = require('../controllers/authController')
 
 
@@ -24,5 +25,8 @@ router.post('/verifypasswordresetOtp',);
 router.post('/newPassword',);
 // change password
 router.post('/changepassword',);
+//login with Google 
+router.post("/google", googleAuth);
+
 
 module.exports = router;

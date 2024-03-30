@@ -7,6 +7,8 @@ const OtpCode = require("../models/OtpCode");
 const transporter = require("../Utilities/transporter");
 const Notification = require("../models/Notification");
 const NotificationService = require('../services/notificationService');
+const passport = require('passport');
+const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 
 
 //////////////// SIGNUP HERE HERE /////////////////////////
@@ -272,106 +274,46 @@ const logout = async (req, res) => {
 
 
 
-exports.googleAuth = async (req, res, next) => {
-    const errors = validationResult(req);
-
-    const { email, userName, account_type, avatar } = req.body
-
+// Configure Google OAuth 2.0 strategy
+const googleAuth = async (req, res, next) => {
+    const { email, userName } = req.body;
 
     try {
+        // Check if the user already exists
+        let user = await User.findOne({ email }).select("-password");
 
-        if (!errors.isEmpty()) {
-            const validationErrors = errors.array().map((error) => error.msg);
-
-            return res.status(400).json({
-                success: false,
-                message: "Validation errors",
-                errors: validationErrors,
-            });
-        }
-
-        const data = await User.findOne({ email }).select("-password")
-
-        if (data) {
-            const token = jwt.sign({ email, userId: data._id.toString() }, process.env.JWT_SIGN, { expiresIn: '6h' })
-
-            // const expiredTokenDate = new Date(Date.now() + 3600000);
-
-
-            let devInfo = {}
-            if (data.account_type === "Project manager") {
-
-                const res = await Developer.findOne({ _id: data._id })
-                devInfo = res
-
-            }
-
-            const { _id, _v: v, ...rest } = devInfo?._doc
-
-            const { _v, ...restInfo } = data?._doc
-            // _id: id,
-            let userData = { ...restInfo, ...rest }
-
-
-            res
-                // .cookie("access_token", token, { httpOnly: true, expires: expiredTokenDate })
-                .status(200).json({
-                    message: "Login you successful",
-                    data: userData,
-                    token
-                })
-
-        } else {
-            const generatedPassword = Math.random().toString(36).slice(-8)
-            const hashedPassword = await bcrypt.hash(generatedPassword, 12);
-
-            const name = userName
-
-            const data = await User.create({ username: name, password: hashedPassword, email, account_type, phone_number: "08 XXX XXXX", verify_account: true, avatar });
-
-
-            let devInfo = {}
-            if (data.account_type === "Project manager") {
-                await User.findByIdAndUpdate(data._id, { status: "Developer" });
-                const res = await Developer.create({ _id: data._id })
-                devInfo = res
-
-            }
-
-
-            const token = jwt.sign({ email: data.email, userId: data._id.toString() }, process.env.JWT_SIGN, { expiresIn: '6h' })
-
-            // const expiredTokenDate = new Date(Date.now() + 3600000);
-
-            // console.log(devInfo)
-            const { _id, _v: v, ...rest } = devInfo?._doc
-
-            const { _id: id, _v, ...restInfo } = data?._doc
-
-            let userData = { ...restInfo, ...rest }
-
-
-            // return res
-            //     .cookie("access_token", token, { httpOnly: true, expires: expiredTokenDate })
-            res.status(200).json({
-                success: true,
-                message: "user signup successfully",
-                data: userData,
+        if (user) {
+            // If the user exists, generate a JWT token
+            const token = jwt.sign({ email, userId: user._id.toString() }, process.env.JWT_SEC_KEY, { expiresIn: '6h' });
+            return res.status(200).json({
+                message: "Login successful",
+                data: user,
                 token
-
             });
+        } else {
+            // If the user doesn't exist, create a new user
+            const newUser = await User.create({ username: userName, email });
+            
+            // Generate JWT token for the new user
+            const token = jwt.sign({ email: newUser.email, userId: newUser._id.toString() }, process.env.JWT_SEC_KEY, { expiresIn: '6h' });
 
+            return res.status(200).json({
+                success: true,
+                message: "User signed up successfully.",
+                data: newUser,
+                token
+            });
         }
-
-
     } catch (error) {
-        next(error)
+        next(error);
     }
-
-}
-
+};
 
 
 
 
-module.exports = { registerUser, login, logout };
+
+
+
+
+module.exports = { registerUser, login, logout, googleAuth };
