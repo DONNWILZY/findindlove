@@ -24,6 +24,8 @@ const upload = require('../middlewares/multer');
 const NotificationService = require('../services/notificationService');
 // import notification modeel
 const Notification = require('../models/Notification');
+//bcrypt 
+const bcrypt = require("bcrypt");
 
 
 

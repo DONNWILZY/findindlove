@@ -1,5 +1,28 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
+require('dotenv').config();
 const Transaction = require('./Transaction');
+//bcrypt 
+const bcrypt = require("bcrypt");
+
+
+// Encryption and decryption functions using AES
+function encrypt(data, key) {
+  const iv = crypto.randomBytes(16); // Generate a random initialization vector
+  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+  let encryptedData = cipher.update(data, 'utf-8', 'hex');
+  encryptedData += cipher.final('hex');
+  return { iv: iv.toString('hex'), encryptedData };
+}
+
+function decrypt(encryptedData, iv, key) {
+  const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), Buffer.from(iv, 'hex'));
+  let decryptedData = decipher.update(encryptedData, 'hex', 'utf-8');
+  decryptedData += decipher.final('utf-8');
+  return decryptedData;
+}
+
+
 
 const UserSchema = new mongoose.Schema({
 
@@ -7,6 +30,11 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     unique: true,
   },
+
+  avatar: {
+    type: String,
+    default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+},
 
   firstName: {
     type: String,
@@ -71,23 +99,24 @@ const UserSchema = new mongoose.Schema({
 
   wallet: {
     balance: {
-      type: Number,
-      default: 5,
+        type: String, // Store encrypted balance as a string
+        required: true,
     },
     currency: {
-      type: String,
-      enums: ['USD', 'NGD'],
-      default: 'NGN',
+        type: String,
+        enum: ['USD', 'NGD'],
+        default: 'NGN',
+        required: true,
     },
     votePoints: {
-      type: Number,
-      default: 0,
+        type: String, // Store encrypted votePoints as a string
+        required: true,
     },
     referralPoints: {
-      type: Number,
-      default: 0,
+        type: String, // Store encrypted referralPoints as a string
+        required: true,
     },
-  },
+},
 
 
   passwordHistory: {
@@ -364,6 +393,83 @@ const UserSchema = new mongoose.Schema({
         }
     });
 });
+
+UserSchema.pre('save', async function(next) {
+  const user = this;
+
+  // Calculate endTime based on startTime, duration, and durationType
+  if (user.accountStatus.action === 'blocked' && user.accountStatus.startTime) {
+      const { startTime, duration, durationType } = user.accountStatus;
+      let endTime;
+
+      switch (durationType) {
+          case 'hours':
+              endTime = new Date(startTime.getTime() + duration * 3600000); // 1 hour = 3600000 milliseconds
+              break;
+          case 'days':
+              endTime = new Date(startTime.getTime() + duration * 86400000); // 1 day = 86400000 milliseconds
+              break;
+          case 'months':
+              // Not precise, but adding 30 days for simplicity
+              endTime = new Date(startTime.getTime() + duration * 30 * 86400000);
+              break;
+          case 'year':
+              // Not precise, but adding 365 days for simplicity
+              endTime = new Date(startTime.getTime() + duration * 365 * 86400000);
+              break;
+          default:
+              // Default to days
+              endTime = new Date(startTime.getTime() + duration * 86400000);
+              break;
+      }
+
+      user.accountStatus.endTime = endTime;
+  }
+
+  next();
+});
+
+
+// Encrypt wallet data before saving
+UserSchema.pre('save', function(next) {
+  const user = this;
+  const encryptionKey = process.env.ENCRYPTION_KEY; // Your encryption key
+
+  // Encrypt balance
+  const { iv: balanceIV, encryptedData: balanceEncryptedData } = encrypt(user.wallet.balance, encryptionKey);
+  user.wallet.balance = `${balanceIV}:${balanceEncryptedData}`;
+
+  // Encrypt votePoints
+  const { iv: votePointsIV, encryptedData: votePointsEncryptedData } = encrypt(user.wallet.votePoints, encryptionKey);
+  user.wallet.votePoints = `${votePointsIV}:${votePointsEncryptedData}`;
+
+  // Encrypt referralPoints
+  const { iv: referralPointsIV, encryptedData: referralPointsEncryptedData } = encrypt(user.wallet.referralPoints, encryptionKey);
+  user.wallet.referralPoints = `${referralPointsIV}:${referralPointsEncryptedData}`;
+
+  next();
+});
+
+// Decrypt wallet data after fetching
+UserSchema.post('init', function(doc) {
+  const encryptionKey = process.env.ENCRYPTION_KEY; // Your encryption key
+
+  // Decrypt balance
+  const [balanceIV, balanceEncryptedData] = doc.wallet.balance.split(':');
+  doc.wallet.balance = decrypt(balanceEncryptedData, balanceIV, encryptionKey);
+
+  // Decrypt votePoints
+  const [votePointsIV, votePointsEncryptedData] = doc.wallet.votePoints.split(':');
+  doc.wallet.votePoints = decrypt(votePointsEncryptedData, votePointsIV, encryptionKey);
+
+  // Decrypt referralPoints
+  const [referralPointsIV, referralPointsEncryptedData] = doc.wallet.referralPoints.split(':');
+  doc.wallet.referralPoints = decrypt(referralPointsEncryptedData, referralPointsIV, encryptionKey);
+});
+
+
+
+
 
 
 

@@ -4,6 +4,8 @@ const { registerUser,
     login,
     logout,
     googleAuth,
+    googleAuthInitiate,
+    googleAuthCallback
 } = require('../controllers/authController')
 
 
@@ -27,6 +29,12 @@ router.post('/newPassword',);
 router.post('/changepassword',);
 //login with Google 
 router.post("/google", googleAuth);
+
+// Route for initiating Google authentication
+router.get('/auth/google', googleAuthInitiate);
+
+// Route for handling callback after Google authentication
+router.get('/auth/google/callback', googleAuthCallback);
 
 
 module.exports = router;

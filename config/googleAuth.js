@@ -1,4 +1,4 @@
-// config.js
+// config/googleAuth.jd
 
 
 // Load environment variables

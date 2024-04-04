@@ -9,6 +9,8 @@ const Notification = require("../models/Notification");
 const NotificationService = require('../services/notificationService');
 const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
+const googleAuthConfig = require('../config/googleAuth');
+const {google} = require('googleapis');
 
 
 //////////////// SIGNUP HERE HERE /////////////////////////
@@ -291,8 +293,11 @@ const googleAuth = async (req, res, next) => {
                 token
             });
         } else {
+
+                // Generate a 10-digit systemNumber
+                const systemNumber = generateSystemNumber();
             // If the user doesn't exist, create a new user
-            const newUser = await User.create({ username: userName, email });
+            const newUser = await User.create({ username: userName, email, systemNumber });
             
             // Generate JWT token for the new user
             const token = jwt.sign({ email: newUser.email, userId: newUser._id.toString() }, process.env.JWT_SEC_KEY, { expiresIn: '6h' });
@@ -309,6 +314,45 @@ const googleAuth = async (req, res, next) => {
     }
 };
 
+// Configure Google OAuth 2.0 strategy
+passport.use(new GoogleStrategy ({
+    clientID: googleAuthConfig.googleClientId,
+    clientSecret: googleAuthConfig.googleClientSecret,
+    callbackURL: "/auth/google/callback"
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    try {
+      // Extract first name and last name from the Google profile
+      const { given_name: firstName, family_name: lastName } = profile._json;
+      
+      // Check if the user is already registered
+      let user = await User.findOne({ email: profile.email });
+
+      if (!user) {
+        // If user is not registered, create a new user record
+        user = await User.create({
+          firstName,
+          lastName,
+          email: profile.email,
+          // Additional user data if needed
+        });
+      }
+
+      // Pass the user object to the next middleware
+      return done(null, user);
+    } catch (error) {
+      return done(error);
+    }
+  }
+));
+
+// Define route for initiating Google authentication
+const googleAuthInitiate = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+// Define route for handling callback after authentication
+const googleAuthCallback = passport.authenticate('google', { failureRedirect: '/login' }, (req, res) => {
+  res.redirect('/');
+});
 
 
 
@@ -316,4 +360,5 @@ const googleAuth = async (req, res, next) => {
 
 
 
-module.exports = { registerUser, login, logout, googleAuth };
+
+module.exports = { registerUser, login, logout, googleAuth, googleAuthInitiate, googleAuthCallback  };
