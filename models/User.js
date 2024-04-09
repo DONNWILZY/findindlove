@@ -71,9 +71,24 @@ const UserSchema = new mongoose.Schema({
     unique: true,
   },
 
+contest:{
   isHouseMate: {
     type: Boolean
   },
+  
+  season: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Season',
+  },
+
+  matched: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
+
+},
+
+ 
 
   password: {
     type: String,
@@ -252,15 +267,7 @@ const UserSchema = new mongoose.Schema({
   //   }
   // },
 
-  season: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Season',
-  },
-
-  matched: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
+ 
 
   following: [{
     type: mongoose.Schema.Types.ObjectId,

@@ -87,10 +87,55 @@ const createSeason = async (req, res) => {
 
 
 
+const addHousematesToSeason = async (req, res) => {
+    const { seasonId, housemateIds } = req.body;
+
+    try {
+        // Find the season by ID
+        const season = await Season.findById(seasonId);
+
+        if (!season) {
+            return res.status(404).json({ status: 'failed', message: 'Season not found' });
+        }
+
+        // Filter out housemateIds that are already present in the season's houseMate array
+        const newHousemateIds = housemateIds.filter(id => !season.houseMate.includes(id));
+
+        if (newHousemateIds.length === 0) {
+            return res.status(400).json({ status: 'failed', message: 'All provided users are already housemates in this season' });
+        }
+
+        // Find users by their IDs
+        const housemates = await User.find({ _id: { $in: housemateIds } });
+
+        // Validate if all housemateIds correspond to valid users
+        if (housemates.length !== housemateIds.length) {
+            return res.status(400).json({ status: 'failed', message: 'Invalid housemate IDs provided' });
+        }
+
+        // Update each housemate's isHouseMate and season fields
+        for (const housemate of housemates) {
+            housemate.contest.isHouseMate = true;
+            housemate.contest.season = seasonId;
+            await housemate.save();
+        }
+
+        // Add housemates to the season
+        season.houseMate.push(...housemateIds);
+        await season.save();
+
+        return res.status(200).json({ status: 'success', message: 'Housemates added to the season', season });
+    } catch (error) {
+        console.error('Error adding housemates to season:', error);
+        return res.status(500).json({ status: 'failed', message: 'Failed to add housemates to the season' });
+    }
+};
+
 
 
 const season = {
     createSeason,
+    addHousematesToSeason
 
 }
 
