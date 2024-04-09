@@ -284,6 +284,27 @@ const googleAuth = async (req, res, next) => {
         // Check if the user already exists
         let user = await User.findOne({ email }).select("-password");
 
+    //     // Check if the user's account is blocked
+    //   if (user.accountStatus.isBlocked === true) {
+    //     // Check if it's time to retry login
+    //     const duration = parseInt(user.accountStatus.duration);
+    //     const durationType = user.accountStatus.durationType;
+
+    //     const check = user.accountStatus.isBlocked
+
+    //     console.log(check, duration,  )
+
+    //     if (duration > 0) {
+    //         return res.status(403).json({
+    //             status: "failed",
+    //             message: `Your account is blocked. You can try again in ${duration} ${durationType}.`
+    //         });
+    //     }
+    // }
+    
+
+
+
         if (user) {
             // If the user exists, generate a JWT token
             const token = jwt.sign({ email, userId: user._id.toString() }, process.env.JWT_SEC_KEY, { expiresIn: '6h' });
@@ -297,7 +318,7 @@ const googleAuth = async (req, res, next) => {
                 // Generate a 10-digit systemNumber
                 const systemNumber = generateSystemNumber();
             // If the user doesn't exist, create a new user
-            const newUser = await User.create({ username: userName, email, systemNumber });
+            const newUser = await User.create({ username: userName, email, systemNumber, isEmailVerified: true, });
             
             // Generate JWT token for the new user
             const token = jwt.sign({ email: newUser.email, userId: newUser._id.toString() }, process.env.JWT_SEC_KEY, { expiresIn: '6h' });

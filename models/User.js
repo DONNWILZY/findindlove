@@ -1,26 +1,13 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-require('dotenv').config();
+const dotenv = require('dotenv');
+dotenv.config();
 const Transaction = require('./Transaction');
-//bcrypt 
-const bcrypt = require("bcrypt");
+// Retrieve the encryption key from the environment variable
+const encryptionKey = process.env.ENCRYPTION_KEY;
 
 
-// Encryption and decryption functions using AES
-function encrypt(data, key) {
-  const iv = crypto.randomBytes(16); // Generate a random initialization vector
-  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
-  let encryptedData = cipher.update(data, 'utf-8', 'hex');
-  encryptedData += cipher.final('hex');
-  return { iv: iv.toString('hex'), encryptedData };
-}
 
-function decrypt(encryptedData, iv, key) {
-  const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), Buffer.from(iv, 'hex'));
-  let decryptedData = decipher.update(encryptedData, 'hex', 'utf-8');
-  decryptedData += decipher.final('utf-8');
-  return decryptedData;
-}
 
 
 
@@ -99,22 +86,25 @@ const UserSchema = new mongoose.Schema({
 
   wallet: {
     balance: {
-        type: String, // Store encrypted balance as a string
-        required: true,
+        type: Number, // Store encrypted balance as a string
+        // required: true,
+        // default: 0
     },
     currency: {
         type: String,
-        enum: ['USD', 'NGD'],
+        enum: ['USD', 'NGN'],
         default: 'NGN',
-        required: true,
+        // required: true,
     },
     votePoints: {
-        type: String, // Store encrypted votePoints as a string
-        required: true,
+        type: Number, // Store encrypted votePoints as a string
+        // required: true,
+        default: 0
     },
     referralPoints: {
-        type: String, // Store encrypted referralPoints as a string
-        required: true,
+        type: Number, // Store encrypted referralPoints as a string
+        // required: true,
+        default: 0
     },
 },
 
@@ -181,12 +171,12 @@ const UserSchema = new mongoose.Schema({
 
     isBlocked:{
       type: Boolean,
-      default: true
+      default: false
     },
 
     duration: {
       type: Number,
-      default: 32
+      // default: 10,
 
     },
     durationType: {
@@ -430,47 +420,74 @@ UserSchema.pre('save', async function(next) {
 });
 
 
+
 // Encrypt wallet data before saving
 UserSchema.pre('save', function(next) {
   const user = this;
-  const encryptionKey = process.env.ENCRYPTION_KEY; // Your encryption key
+  const encryptionKey = process.env.ENCRYPTION_KEY;
 
-  // Encrypt balance
-  const { iv: balanceIV, encryptedData: balanceEncryptedData } = encrypt(user.wallet.balance, encryptionKey);
-  user.wallet.balance = `${balanceIV}:${balanceEncryptedData}`;
-
-  // Encrypt votePoints
-  const { iv: votePointsIV, encryptedData: votePointsEncryptedData } = encrypt(user.wallet.votePoints, encryptionKey);
-  user.wallet.votePoints = `${votePointsIV}:${votePointsEncryptedData}`;
-
-  // Encrypt referralPoints
-  const { iv: referralPointsIV, encryptedData: referralPointsEncryptedData } = encrypt(user.wallet.referralPoints, encryptionKey);
-  user.wallet.referralPoints = `${referralPointsIV}:${referralPointsEncryptedData}`;
+  // Encrypt wallet fields
+  if (user.wallet.balance) {
+    user.wallet.balance = encrypt(user.wallet.balance, encryptionKey);
+  }
+  if (user.wallet.votePoints) {
+    user.wallet.votePoints = encrypt(user.wallet.votePoints, encryptionKey);
+  }
+  if (user.wallet.referralPoints) {
+    user.wallet.referralPoints = encrypt(user.wallet.referralPoints, encryptionKey);
+  }
 
   next();
 });
 
-// Decrypt wallet data after fetching
-UserSchema.post('init', function(doc) {
-  const encryptionKey = process.env.ENCRYPTION_KEY; // Your encryption key
+// // Decrypt wallet data after fetching
+// UserSchema.post('init', function(doc) {
+//   const encryptionKey = process.env.ENCRYPTION_KEY;
 
-  // Decrypt balance
-  const [balanceIV, balanceEncryptedData] = doc.wallet.balance.split(':');
-  doc.wallet.balance = decrypt(balanceEncryptedData, balanceIV, encryptionKey);
-
-  // Decrypt votePoints
-  const [votePointsIV, votePointsEncryptedData] = doc.wallet.votePoints.split(':');
-  doc.wallet.votePoints = decrypt(votePointsEncryptedData, votePointsIV, encryptionKey);
-
-  // Decrypt referralPoints
-  const [referralPointsIV, referralPointsEncryptedData] = doc.wallet.referralPoints.split(':');
-  doc.wallet.referralPoints = decrypt(referralPointsEncryptedData, referralPointsIV, encryptionKey);
-});
-
+//   // Decrypt wallet fields
+//   if (doc.wallet.balance) {
+//     doc.wallet.balance = decrypt(doc.wallet.balance, encryptionKey);
+//   }
+//   if (doc.wallet.votePoints) {
+//     doc.wallet.votePoints = decrypt(doc.wallet.votePoints, encryptionKey);
+//   }
+//   if (doc.wallet.referralPoints) {
+//     doc.wallet.referralPoints = decrypt(doc.wallet.referralPoints, encryptionKey);
+//   }
+// });
 
 
+// // Encryption function using AES
+// function encrypt(data, key) {
+//   // Check if the encryption key meets the required length
+//   if (key.length !== 32) {
+//       throw new Error('Invalid encryption key length. Expected length: 32 bytes (256 bits).');
+//   }
 
+//   const iv = crypto.randomBytes(16); // Generate a random initialization vector
+//   const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+//   let encryptedData = cipher.update(data.toString(), 'utf-8', 'hex');
+//   encryptedData += cipher.final('hex');
+//   return `${iv.toString('hex')}:${encryptedData}`;
+// }
 
+// // Decryption function using AES
+// function decrypt(encryptedData, key) {
+//   // Check if the encryption key meets the required length
+//   if (key.length !== 32) {
+//       throw new Error('Invalid encryption key length. Expected length: 32 bytes (256 bits).');
+//   }
+
+//   if (!encryptedData) {
+//       return ''; // or handle the error gracefully
+//   }
+
+//   const [iv, encryptedDataWithoutIV] = encryptedData.split(':');
+//   const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), Buffer.from(iv, 'hex'));
+//   let decryptedData = decipher.update(encryptedDataWithoutIV, 'hex', 'utf-8');
+//   decryptedData += decipher.final('utf-8');
+//   return decryptedData;
+// }
 
 
 
