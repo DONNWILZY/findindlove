@@ -14,10 +14,10 @@ const NotificationService = require('../services/notificationService');
 
 
 const createSeason = async (req, res) => {
-    const { title, description, subtitle, year, duration } = req.body;
+    const { title, description, subtitle, year, duration, createdBy} = req.body;
 
-           // Get the ID of the logged-in user from req.user
-           const loggedInUserId = req.user._id;
+        //    // Get the ID of the logged-in user from req.user
+        //    const loggedInUserId = req.user._id;
 
     try {
         // Create the season with the provided data
@@ -27,8 +27,20 @@ const createSeason = async (req, res) => {
             subtitle,
             year,
             duration,
-            createdBy: loggedInUserId ,
+            createdBy ,
         });
+
+         // console.log(createdBy)
+
+        // Populate the createdBy field to extract first name, last name, and role
+        const user = await User.findById(createdBy);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+        
+          // Extract user details
+          const { firstName, lastName, role } = user;
 
         // Save the season to the database
         const savedSeason = await newSeason.save();
@@ -42,11 +54,11 @@ const createSeason = async (req, res) => {
         // Create notifications for superAdmin users
         const notifications = recipientIds.map(recipientId => new Notification({
             user: recipientId,
-            message: `New season "${title}" has been created. by ${loggedInUserId}`,
+            message: `New season "${title}" has been created by (${role}): ${firstName} ${lastName}.`,
             recipientType: 'superAdmin',
             activityType: 'created New Season',
             activityId: savedSeason._id,
-            // You may add additional fields or customizations here
+           
         }));
 
         // Save notifications to the database
@@ -61,6 +73,7 @@ const createSeason = async (req, res) => {
                 subtitle,
                 year,
                 duration,
+                createdBy,
             }
         });
     } catch (error) {
@@ -71,21 +84,6 @@ const createSeason = async (req, res) => {
         });
     }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
