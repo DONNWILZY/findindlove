@@ -40,7 +40,7 @@ const createSeason = async (req, res) => {
         }
         
           // Extract user details
-          const { firstName, lastName, role } = user;
+          const { firstName, lastName, role } = user
 
         // Save the season to the database
         const savedSeason = await newSeason.save();
@@ -118,7 +118,34 @@ const addHousematesToSeason = async (req, res) => {
             housemate.contest.isHouseMate = true;
             housemate.contest.season = seasonId;
             await housemate.save();
+
+            // Create notification for housemate
+            await NotificationService.createNotification({
+                user: housemate._id,
+                message: `You have been added as a housemate to the season "${season.title}"`,
+                recipientType: 'user',
+                activityType: 'added as housemate',
+                activityId: seasonId
+            });
         }
+
+        // Create notification for superadmins
+        const superAdmins = await User.find({ role: 'superAdmin' });
+        for (const admin of superAdmins) {
+            // Skip notifying the creator of the season (if they are a superAdmin)
+            if (season.createdBy && admin._id.equals(season.createdBy._id)) {
+                continue;
+            }
+            await NotificationService.createNotification({
+                user: admin._id,
+                message: `New housemates have been added to the season "${season.title}"`,
+                recipientType: 'superAdmin',
+                activityType: 'housemates added',
+                activityId: seasonId
+            });
+        }
+
+
 
         // Add housemates to the season
         season.houseMate.push(...housemateIds);

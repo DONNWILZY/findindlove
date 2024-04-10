@@ -471,9 +471,9 @@ const getNewsWithCommentsAndReplies = async (postId) => {
   
       // 2. Fetch comments for the post, populating reactions and replies
       const comments = await Comment.find({ post_id: post._id }).populate({
-        path: 'reactions replies', // Populate reactions and replies fields in the Comment model
+        path: 'reactions replies', 
         populate: {
-          path: 'reactions', // Populate reactions field in the Reaction model for each comment
+          path: 'reactions', 
         }
       }).populate({
         path: 'replies',

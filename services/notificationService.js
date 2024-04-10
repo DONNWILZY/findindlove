@@ -1,3 +1,5 @@
+//// service/notification.js
+
 const Notification = require('../models/Notification');
 
 class NotificationService {
