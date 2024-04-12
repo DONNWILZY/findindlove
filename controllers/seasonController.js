@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Vote = require('../models/Vote');
 const Form = require('../models/Form');
 const News = require('../models/News');
+const Match = require('../models/Matched');
 const VideoContent = require('../models/VideoContent');
 const HouseMate = require('../models/User');
 const Post = require('../models/Post');
@@ -159,10 +160,66 @@ const addHousematesToSeason = async (req, res) => {
 };
 
 
+const addHouseMatesToMatch = async (maleHouseMateId, femaleHouseMateId, seasonId) => {
+    try {
+        // Check if the specified season exists and retrieve its housemates
+        const season = await Season.findById(seasonId).populate('houseMate');
+        if (!season) {
+            throw new Error('Season not found');
+        }
+
+        // Find the housemates in the season
+        const maleHouseMate = season.houseMate.find(housemate => housemate._id.toString() === maleHouseMateId.toString());
+        const femaleHouseMate = season.houseMate.find(housemate => housemate._id.toString() === femaleHouseMateId.toString());
+
+        // Ensure that both housemates are found and represent different genders
+        if (!maleHouseMate || !femaleHouseMate) {
+            throw new Error('One or both housemates not found in the season');
+        }
+
+        // Ensure that one housemate represents male and the other represents female
+        if (maleHouseMate.gender === 'female' || femaleHouseMate.gender === 'male') {
+            throw new Error('Invalid combination of housemates genders');
+        }
+
+        // Check if either of the housemates has already been matched in the season
+        const existingMatch = await Match.findOne({
+            $or: [
+                { maleHouseMate: maleHouseMateId },
+                { femaleHouseMate: femaleHouseMateId }
+            ],
+            season: seasonId
+        });
+
+        if (existingMatch) {
+            throw new Error('One or both housemates have already been matched in this season');
+        }
+
+        // Create the match with the specified housemates and season
+        const match = await Match.create({
+            maleHouseMate: maleHouseMateId,
+            femaleHouseMate: femaleHouseMateId,
+            approvalStatus: { maleApproval: 'pending', femaleApproval: 'pending' },
+            status: 'pending',
+            season: seasonId
+        });
+
+        console.log('Housemates added to match:', match);
+        return match;
+    } catch (error) {
+        console.error('Error adding housemates to match:', error);
+        throw new Error('Failed to add housemates to match');
+    }
+};
+
+
+
+
 
 const season = {
     createSeason,
-    addHousematesToSeason
+    addHousematesToSeason,
+    addHouseMatesToMatch
 
 }
 

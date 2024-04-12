@@ -44,16 +44,13 @@ const SeasonSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
+
     matches: [{
-        maleHouseMate: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        femaleHouseMate: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Match'
     }],
+    
+   
     createdAt: {
         type: Date,
         default: Date.now

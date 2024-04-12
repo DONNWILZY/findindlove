@@ -1,4 +1,6 @@
-const matchSchema = new mongoose.Schema({
+const mongoose = require('mongoose');
+
+const MatchSchema = new mongoose.Schema({
     maleHouseMate: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
@@ -10,12 +12,12 @@ const matchSchema = new mongoose.Schema({
     approvalStatus: {
         maleApproval: {
             type: String,
-            enum: ['pending', 'approved', 'rejected'],
+            enum: ['pending', 'accept', 'rejected'],
             default: 'pending'
         },
         femaleApproval: {
             type: String,
-            enum: ['pending', 'approved', 'rejected'],
+            enum: ['pending', 'accept', 'rejected'],
             default: 'pending'
         }
     },
@@ -24,6 +26,14 @@ const matchSchema = new mongoose.Schema({
         enum: ['pending', 'matched', 'rejected'],
         default: 'pending'
     },
+    season: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Season'
+    }
+},
+{ timestamps: true }
+);
 
-   
-}, { timestamps: true });
+const Match = mongoose.model('Match', MatchSchema);
+
+module.exports = Match;
