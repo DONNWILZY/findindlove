@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const MatchSchema = new mongoose.Schema({
-    maleHouseMate: {
+    male: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    femaleHouseMate: {
+    female: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },

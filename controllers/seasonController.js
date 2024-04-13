@@ -15,10 +15,10 @@ const NotificationService = require('../services/notificationService');
 
 
 const createSeason = async (req, res) => {
-    const { title, description, subtitle, year, duration, createdBy} = req.body;
+    const { title, description, subtitle, year, duration, createdBy } = req.body;
 
-        //    // Get the ID of the logged-in user from req.user
-        //    const loggedInUserId = req.user._id;
+    //    // Get the ID of the logged-in user from req.user
+    //    const loggedInUserId = req.user._id;
 
     try {
         // Create the season with the provided data
@@ -28,10 +28,10 @@ const createSeason = async (req, res) => {
             subtitle,
             year,
             duration,
-            createdBy ,
+            createdBy,
         });
 
-         // console.log(createdBy)
+        // console.log(createdBy)
 
         // Populate the createdBy field to extract first name, last name, and role
         const user = await User.findById(createdBy);
@@ -39,9 +39,9 @@ const createSeason = async (req, res) => {
         if (!user) {
             throw new Error('User not found');
         }
-        
-          // Extract user details
-          const { firstName, lastName, role } = user
+
+        // Extract user details
+        const { firstName, lastName, role } = user
 
         // Save the season to the database
         const savedSeason = await newSeason.save();
@@ -59,7 +59,7 @@ const createSeason = async (req, res) => {
             recipientType: 'superAdmin',
             activityType: 'created New Season',
             activityId: savedSeason._id,
-           
+
         }));
 
         // Save notifications to the database
@@ -162,47 +162,83 @@ const addHousematesToSeason = async (req, res) => {
 
 const addHouseMatesToMatch = async (maleHouseMateId, femaleHouseMateId, seasonId) => {
     try {
-        // Check if the specified season exists and retrieve its housemates
-        const season = await Season.findById(seasonId).populate('houseMate');
-        if (!season) {
-            throw new Error('Season not found');
+        // Check if both housemates exist and represent the correct genders
+        const [male, female] = await Promise.all([
+            User.findById(maleId),
+            User.findById(femaleHousId)
+        ]);
+
+        if (!male || !female) {
+            throw new Error('Invalid housemate IDs provided');
         }
 
-        // Find the housemates in the season
-        const maleHouseMate = season.houseMate.find(housemate => housemate._id.toString() === maleHouseMateId.toString());
-        const femaleHouseMate = season.houseMate.find(housemate => housemate._id.toString() === femaleHouseMateId.toString());
-
-        // Ensure that both housemates are found and represent different genders
-        if (!maleHouseMate || !femaleHouseMate) {
-            throw new Error('One or both housemates not found in the season');
-        }
-
-        // Ensure that one housemate represents male and the other represents female
-        if (maleHouseMate.gender === 'female' || femaleHouseMate.gender === 'male') {
+        if (male.gender !== 'male' || female.gender !== 'female') {
             throw new Error('Invalid combination of housemates genders');
         }
 
         // Check if either of the housemates has already been matched in the season
         const existingMatch = await Match.findOne({
             $or: [
-                { maleHouseMate: maleHouseMateId },
-                { femaleHouseMate: femaleHouseMateId }
+                { male: maleId },
+                { female: femaleId }
             ],
             season: seasonId
         });
 
         if (existingMatch) {
-            throw new Error('One or both housemates have already been matched in this season');
+            throw new Error('One of the housemates has already been matched in the season');
         }
 
-        // Create the match with the specified housemates and season
+        // Create the match
         const match = await Match.create({
-            maleHouseMate: maleHouseMateId,
-            femaleHouseMate: femaleHouseMateId,
+            male: maleId,
+            female: femaleId,
             approvalStatus: { maleApproval: 'pending', femaleApproval: 'pending' },
             status: 'pending',
             season: seasonId
         });
+
+        // Push the match ID to the season// this is optional, could also be avoided to ditch reduancy
+        const season = await Season.findById(seasonId);
+        if (!season) {
+            throw new Error('Season not found');
+        }
+        if (season.matches.includes(match._id)) {
+            throw new Error('Match ID already exists in the season');
+        }
+        season.matches.push(match._id);
+        await season.save();
+
+        // Notify the male housemate
+        await NotificationService.createNotification({
+            user: maleId,
+            message: `You have been matched with ${female.firstName} ${female.lastName}`,
+            recipientType: 'user',
+            activityType: 'matched',
+            activityId: match._id
+        });
+
+        // Notify the female housemate
+        await NotificationService.createNotification({
+            user: femaleHouseMateId,
+            message: `You have been matched with ${male.firstName} ${male.lastName}`,
+            recipientType: 'user',
+            activityType: 'matched',
+            activityId: match._id
+        });
+
+        // Notify the super admin
+        const superAdmins = await User.find({ role: 'superAdmin' });
+        const recipientIds = superAdmins.map(admin => admin._id);
+        await Promise.all(recipientIds.map(async recipientId => {
+            await NotificationService.createNotification({
+                user: recipientId,
+                message: `${male.firstName} ${male.lastName} has been matched with ${female.firstName} ${female.lastName}`,
+                recipientType: 'superAdmin',
+                activityType: 'matched',
+                activityId: match._id,
+            });
+        }));
 
         console.log('Housemates added to match:', match);
         return match;
@@ -214,12 +250,77 @@ const addHouseMatesToMatch = async (maleHouseMateId, femaleHouseMateId, seasonId
 
 
 
+const acceptMatch = async (userId, matchId) => {
+    try {
+        // Attempt to find the match by ID
+        const match = await Match.findById(matchId);
+        if (!match) {
+            throw new Error('Match not found.');
+        }
+
+        // Retrieve both housemates from the database
+        const [maleHouseMate, femaleHouseMate] = await Promise.all([
+            User.findById(match.maleHouseMate),
+            User.findById(match.femaleHouseMate)
+        ]);
+
+        // Check if both housemates exist and represent the correct genders
+        if (!maleHouseMate || !femaleHouseMate) {
+            throw new Error('One or both housemates do not exist.');
+        }
+
+        // Check if the user is one of the housemates
+        const isMaleHouseMate = maleHouseMate && maleHouseMate._id.equals(userId);
+        const isFemaleHouseMate = femaleHouseMate && femaleHouseMate._id.equals(userId);
+
+        if (!isMaleHouseMate && !isFemaleHouseMate) {
+            throw new Error(`User with ID ${userId} is not part of this match.`);
+        }
+
+        // Update the approval status based on the user's role
+        if (isMaleHouseMate) {
+            match.approvalStatus.maleApproval = 'accept';
+        } else {
+            match.approvalStatus.femaleApproval = 'accept';
+        }
+
+        // If both housemates have accepted, update the match status
+        if (match.approvalStatus.maleApproval === 'accept' && match.approvalStatus.femaleApproval === 'accept') {
+            match.status = 'matched';
+        }
+
+        // Persist the changes to the database
+        await match.save();
+        console.log('Updated match status:', match);
+
+        return match;
+    } catch (error) {
+        console.error('Error during match acceptance:', error);
+        throw error; // Rethrow the error to handle it in the calling function
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 const season = {
     createSeason,
     addHousematesToSeason,
-    addHouseMatesToMatch
+    addHouseMatesToMatch,
+    acceptMatch
 
 }
 
