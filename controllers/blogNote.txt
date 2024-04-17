@@ -778,3 +778,121 @@ const userNotification = await Notification.create({
 });
 
 
+
+
+//// accept match
+const acceptMatch = async (userId, matchId) => {
+    try {
+        // Attempt to find the match by ID
+        const match = await Match.findById(matchId);
+        if (!match) {
+            throw new Error('Match not found.');
+        }
+
+        // Retrieve both housemates from the database
+        const [male, female] = await Promise.all([
+            User.findById(match.male),
+            User.findById(match.female)
+        ]);
+
+        // Check if both housemates exist and represent the correct genders
+        if (!male || !female) {
+            throw new Error('One or both housemates do not exist.');
+        }
+
+        // Check if the user is one of the housemates
+        const isMale = male && male._id.equals(userId);
+        const isFemale = female && female._id.equals(userId);
+
+        if (!isMale && !isFemale) {
+            throw new Error(`User with ID ${userId} is not part of this match.`);
+        }
+
+        // Update the approval status based on the user's role (male or female)
+        if (isMale) {
+            match.approvalStatus.maleApproval = 'accept';
+        } else {
+            match.approvalStatus.femaleApproval = 'accept';
+        }
+
+        // Check if both housemates have accepted or one has rejected
+        if (match.approvalStatus.maleApproval === 'accept' && match.approvalStatus.femaleApproval === 'accept') {
+            match.status = 'matched';
+        } else if (match.approvalStatus.maleApproval === 'rejected' || match.approvalStatus.femaleApproval === 'rejected') {
+            match.status = 'rejected';
+        }
+
+        // Persist the changes to the database
+        await match.save();
+        console.log('Updated match status:', match);
+
+        return match;
+    } catch (error) {
+        console.error('Error during match acceptance:', error);
+        throw error; // Rethrow the error to handle it in the calling function
+    }
+};
+
+
+
+const acceptMatch = async (userId, matchId) => {
+    try {
+        // Attempt to find the match by ID
+        const match = await Match.findById(matchId);
+        if (!match) {
+            throw new Error('Match not found.');
+        }
+
+        // Retrieve both housemates from the database
+        const [male, female] = await Promise.all([
+            User.findById(match.male),
+            User.findById(match.female)
+        ]);
+
+        // Check if both housemates exist and represent the correct genders
+        if (!male || !female) {
+            throw new Error('One or both housemates do not exist.');
+        }
+
+        // Check if the user is one of the housemates
+        const isMale = male && male._id.equals(userId);
+        const isFemale = female && female._id.equals(userId);
+
+        if (!isMale && !isFemale) {
+            throw new Error(`User with ID ${userId} is not part of this match.`);
+        }
+
+        // Update the approval status based on the user's role (male or female)
+        if (isMale) {
+            match.approvalStatus.maleApproval = 'accept' ;
+        } else if(isMale){
+            match.approvalStatus.femaleApproval = 'rejected' ;
+        }else if(isFemale){
+            match.approvalStatus.femaleApproval = 'accept' ;
+        }else{
+            match.approvalStatus.femaleApproval = 'rejected' ;
+        }
+
+        // Check if both housemates have accepted or one has rejected
+        if (match.approvalStatus.maleApproval === 'accept' && match.approvalStatus.femaleApproval === 'accept') {
+            match.status = 'matched';
+        } else if (match.approvalStatus.maleApproval === 'rejected' || match.approvalStatus.femaleApproval === 'rejected') {
+            match.status = 'rejected';
+        }else if(match.approvalStatus.maleApproval === 'accept' && match.approvalStatus.femaleApproval === 'rejected'){
+            match.status = 'rejected';
+        }else if(match.approvalStatus.maleApproval === 'rejected' && match.approvalStatus.femaleApproval === 'accept'){
+            match.status = 'rejected';
+        }
+
+        console.log(match.approvalStatus.maleApproval, match.approvalStatus.femaleApproval)
+
+        // Persist the changes to the database
+        await match.save();
+        // console.log('Updated match status:', match);
+
+        return match;
+    } catch (error) {
+        console.error('Error during match acceptance:', error);
+        throw error; // Rethrow the error to handle it in the calling function
+    }
+};

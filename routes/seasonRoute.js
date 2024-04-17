@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {createSeason, addHousematesToSeason, addHouseMatesToMatch, acceptMatch} = require('../controllers/seasonController');
+const {createSeason, addHousematesToSeason, addHouseMatesToMatch, acceptMatch, changeMatchStatus} = require('../controllers/seasonController');
 const {verifyToken, verifyUser, verifyAdmin, verifyStaff, verifySuperAdmin, checkPermission} = require('../middlewares/authMiddleware');
 
 
@@ -26,8 +26,8 @@ router.post('/match/add', async (req, res) => {
 
 
 // Route to accept a match
-router.put('/match/accept/:matchId', verifyToken, async (req, res) => {
-    const { userId } = req.body; // Extract userId from the request body
+router.put('/match/accept/:matchId', async (req, res) => {
+    const { userId } = req.body; 
     const matchId = req.params.matchId;
 
     try {
@@ -36,6 +36,17 @@ router.put('/match/accept/:matchId', verifyToken, async (req, res) => {
     } catch (error) {
         console.error('Error accepting match:', error);
         res.status(500).json({ status: 'failed', message: 'Failed to accept match' });
+    }
+})
+
+router.post('/change-match-status', async (req, res) => {
+    const { maleUserId, femaleUserId } = req.body;
+
+    try {
+        const result = await changeMatchStatus(maleUserId, femaleUserId);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 });
 
